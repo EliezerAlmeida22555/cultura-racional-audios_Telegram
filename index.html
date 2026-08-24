@@ -2,30 +2,66 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Navegador de Áudios — Cultura Racional</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Navegador e Marcador de Áudios — Cultura Racional</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg-primary: #0f172a;
+    --bg-card: #1e293b;
+    --bg-input: #334155;
+    --accent: #38bdf8;
+    --accent-hover: #0284c7;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
   body {
-    font-family: 'Segoe UI', sans-serif;
-    background: var(--tg-theme-bg-color, #1a1a2e);
-    color: var(--tg-theme-text-color, #ffffff);
+    background-color: var(--tg-theme-bg-color, var(--bg-primary));
+    color: var(--tg-theme-text-color, var(--text-primary));
     min-height: 100vh;
     padding: 16px;
+    padding-bottom: 30px;
+    -webkit-font-smoothing: antialiased;
   }
-  h1 {
-    font-size: 1.2em;
+
+  .header {
     text-align: center;
-    margin-bottom: 6px;
+    margin-bottom: 16px;
+  }
+  .header-icon { font-size: 2.2em; margin-bottom: 4px; display: block; }
+  h1 { font-size: 1.3em; font-weight: 700; color: var(--tg-theme-text-color, #fff); }
+  .subtitle { font-size: 0.85em; color: var(--tg-theme-hint-color, var(--text-secondary)); margin-top: 2px; }
+
+  /* 4 Botões Principais de Navegação */
+  .nav-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .nav-btn {
+    background: var(--tg-theme-secondary-bg-color, var(--bg-card));
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px 8px;
     color: var(--tg-theme-text-color, #fff);
+    font-size: 0.88em;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
-  .subtitle {
-    font-size: 0.85em;
-    text-align: center;
-    color: var(--tg-theme-hint-color, #aaa);
-    margin-bottom: 20px;
-  }
+  .nav-btn:active { transform: scale(0.97); }
+
+  /* Campo de Busca */
   .search-box {
     display: flex;
     gap: 8px;
@@ -35,95 +71,177 @@
     flex: 1;
     padding: 12px 14px;
     border-radius: 12px;
-    border: none;
-    background: var(--tg-theme-secondary-bg-color, #16213e);
+    border: 1px solid var(--border-color);
+    background: var(--tg-theme-secondary-bg-color, var(--bg-input));
     color: var(--tg-theme-text-color, #fff);
     font-size: 1em;
     outline: none;
   }
-  input::placeholder { color: var(--tg-theme-hint-color, #888); }
-  button.search-btn {
+  input::placeholder { color: var(--tg-theme-hint-color, var(--text-secondary)); }
+  .search-btn {
     padding: 12px 18px;
     border-radius: 12px;
     border: none;
-    background: var(--tg-theme-button-color, #4a90d9);
+    background: var(--tg-theme-button-color, var(--accent));
     color: var(--tg-theme-button-text-color, #fff);
-    font-size: 1em;
+    font-size: 1.1em;
     cursor: pointer;
     font-weight: bold;
   }
-  .colecoes {
+
+  /* Grid de Coleções */
+  .colecoes-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
-  .col-btn {
+  .col-card {
     padding: 14px 10px;
     border-radius: 14px;
     border: none;
     font-size: 0.9em;
-    font-weight: bold;
+    font-weight: 700;
     cursor: pointer;
     text-align: center;
     color: #fff;
-    line-height: 1.4;
+    line-height: 1.3;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+    transition: transform 0.15s ease;
   }
+  .col-card:active { transform: scale(0.96); }
   .col-span2 { grid-column: span 2; }
 
-  /* Cores fixas para coleções conhecidas, fallback para novas */
-  .col-AMARELÕES  { background: #b8860b; }
-  .col-OBRA       { background: #2e7d32; }
-  .col-RÉPLICA    { background: #b71c1c; }
-  .col-TRÉPLICA   { background: #1565c0; }
-  .col-HISTÓRICO  { background: #6a1b9a; }
-  .col-MUSICAS    { background: #00695c; }
-  .col-default    { background: #37474f; }
+  .col-AMARELÕES  { background: linear-gradient(135deg, #d97706, #b45309); }
+  .col-OBRA       { background: linear-gradient(135deg, #15803d, #166534); }
+  .col-RÉPLICA    { background: linear-gradient(135deg, #b91c1c, #991b1b); }
+  .col-TRÉPLICA   { background: linear-gradient(135deg, #1d4ed8, #1e40af); }
+  .col-HISTÓRICO  { background: linear-gradient(135deg, #6b21a8, #581c87); }
+  .col-MUSICAS    { background: linear-gradient(135deg, #0d9488, #0f766e); }
+  .col-default    { background: linear-gradient(135deg, #475569, #334155); }
 
-  .results { margin-top: 4px; }
-  .vol-item {
-    padding: 14px;
-    border-radius: 12px;
-    background: var(--tg-theme-secondary-bg-color, #16213e);
-    margin-bottom: 10px;
-    cursor: pointer;
-    text-decoration: none;
-    display: block;
-    color: var(--tg-theme-text-color, #fff);
-    border-left: 4px solid var(--tg-theme-button-color, #4a90d9);
+  /* Seção de Conteúdo e Resultados */
+  .card-box {
+    background: var(--tg-theme-secondary-bg-color, var(--bg-card));
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
-  .vol-title { font-weight: bold; font-size: 1em; }
-  .vol-sub   { font-size: 0.8em; color: var(--tg-theme-hint-color, #aaa); margin-top: 4px; }
-  .empty { text-align: center; color: var(--tg-theme-hint-color, #aaa); padding: 30px 0; }
-  .header-icon { font-size: 2em; text-align: center; margin-bottom: 6px; }
-  .voltar-btn {
-    display: inline-block;
-    margin-bottom: 12px;
-    padding: 8px 14px;
-    border-radius: 10px;
-    background: var(--tg-theme-secondary-bg-color, #16213e);
+  .card-title { font-size: 1.05em; font-weight: 700; margin-bottom: 8px; color: var(--tg-theme-text-color, #fff); }
+  .card-desc { font-size: 0.9em; color: var(--tg-theme-hint-color, var(--text-secondary)); line-height: 1.4; margin-bottom: 12px; }
+
+  /* Itens de Volume */
+  .vol-item {
+    background: var(--tg-theme-bg-color, var(--bg-primary));
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    display: block;
+    text-decoration: none;
     color: var(--tg-theme-text-color, #fff);
-    font-size: 0.9em;
+  }
+  .vol-header { display: flex; justify-content: space-between; align-items: center; }
+  .vol-title { font-weight: 700; font-size: 0.98em; }
+  .vol-btn-link {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--tg-theme-button-color, var(--accent));
+    color: var(--tg-theme-button-text-color, #fff);
+    font-size: 0.85em;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    width: 100%;
+  }
+
+  /* Botões de Marcador de Faixas */
+  .faixas-marks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border-color);
+  }
+  .mark-chip {
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.78em;
+    cursor: pointer;
+  }
+  .mark-chip.active {
+    background: #22c55e;
+    color: #fff;
+    font-weight: bold;
+  }
+
+  .pagination {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 14px;
+  }
+  .page-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: #fff;
+    font-size: 0.85em;
+    cursor: pointer;
+  }
+
+  .voltar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 12px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 0.85em;
     cursor: pointer;
     border: none;
   }
+
+  .empty { text-align: center; color: var(--tg-theme-hint-color, var(--text-secondary)); padding: 24px 0; font-size: 0.9em; }
 </style>
 </head>
 <body>
-<div class="header-icon">🎧</div>
-<h1>Navegador de Áudios</h1>
-<p class="subtitle">Cultura Racional — Encontre qualquer volume</p>
 
+<div class="header">
+  <span class="header-icon">🎧</span>
+  <h1>CULTURA RACIONAL</h1>
+  <p class="subtitle">Navegador & Marcador de Áudios</p>
+</div>
+
+<!-- 4 Botões Principais de Navegação -->
+<div class="nav-grid">
+  <button class="nav-btn" onclick="focarBusca()">🔍 BUSCAR VOLUME</button>
+  <button class="nav-btn" onclick="mostrarOndeParei()">📍 ONDE PAREI?</button>
+  <button class="nav-btn" onclick="resetarParaColecoes()">📚 VER COLEÇÕES</button>
+  <button class="nav-btn" onclick="sortearAudioDia()">🎲 ÁUDIO DO DIA</button>
+</div>
+
+<!-- Campo de Busca -->
 <div class="search-box">
-  <input type="text" id="search" placeholder="Ex: A01, O15, H050, Musicas..." />
-  <button class="search-btn" onclick="buscar()">🔍</button>
+  <input type="text" id="search" placeholder="Digite número ou código (ex: A01, O15, H050)..." />
+  <button class="search-btn" onclick="executarBusca()">🔍</button>
 </div>
 
-<div class="colecoes" id="colecoes-grid">
-  <!-- Gerado dinamicamente pelo JS abaixo -->
+<!-- Container Principal Dinâmico -->
+<div id="content-container">
+  <div class="colecoes-grid" id="colecoes-grid"></div>
 </div>
-
-<div class="results" id="results"></div>
 
 <script>
 const GROUP_LINK = 'https://t.me/c/4415417039/';
@@ -427,63 +545,135 @@ const TOPICOS = {
   "HISTÓRICO - H231": 3512,
   "HISTÓRICO - H232": 3519,
   "HISTÓRICO - H233": 3525,
+  "HISTÓRICO - H234": 3533,
+  "HISTÓRICO - H235": 3541,
+  "HISTÓRICO - H236": 3549,
+  "HISTÓRICO - H237": 3579,
+  "HISTÓRICO - H238": 3586,
+  "HISTÓRICO - H239": 3594,
   "MUSICAS": 119
 };
 
-// Emojis por coleção
 const EMOJIS = {
   'AMARELÕES': '🟡', 'OBRA': '🟢', 'RÉPLICA': '🔴',
   'TRÉPLICA': '🔵', 'HISTÓRICO': '🟣', 'MUSICAS': '🎵'
 };
 const EMOJI_PADRAO = '📁';
 
-// CSS class por coleção (sanitiza para usar como classe CSS)
-function cssClass(nome) {
-  const known = ['AMARELÕES','OBRA','RÉPLICA','TRÉPLICA','HISTÓRICO','MUSICAS'];
-  return known.includes(nome.toUpperCase()) ? `col-${nome}` : 'col-default';
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
 }
 
-const tg = window.Telegram && window.Telegram.WebApp;
-if (tg) tg.ready();
-
 function norm(s) {
-  return s.toLowerCase().normalize('NFC').trim();
+  return (s || '').toLowerCase().normalize('NFC').trim();
 }
 
 function extrairNum(s) {
-  const m = s.match(/\d+/);
-  return m ? parseInt(m[0]) : -1;
+  const m = String(s).match(/\d+/);
+  return m ? parseInt(m[0]) : 999999;
 }
 
-// Detecta coleções automaticamente dos tópicos
-function detectarColecoes() {
-  const cols = new Set();
-  Object.keys(TOPICOS).forEach(nome => {
-    const col = nome.includes(' - ') ? nome.split(' - ')[0].trim() : nome.trim();
-    cols.add(col);
-  });
-  return [...cols].sort();
+function cssClass(nome) {
+  const known = ['AMARELÕES','OBRA','RÉPLICA','TRÉPLICA','HISTÓRICO','MUSICAS'];
+  return known.includes(nome.toUpperCase()) ? `col-${nome.toUpperCase()}` : 'col-default';
 }
 
-// Monta botões de coleções dinamicamente
-function montarBotoesColecoes() {
-  const cols = detectarColecoes();
-  const grid = document.getElementById('colecoes-grid');
-  grid.innerHTML = '';
-
-  cols.forEach((col, idx) => {
-    const btn = document.createElement('button');
-    btn.className = 'col-btn ' + cssClass(col);
-    // Coleção ímpar no final sozinha ocupa 2 colunas
-    if (cols.length % 2 !== 0 && idx === cols.length - 1) btn.classList.add('col-span2');
-    const emoji = EMOJIS[col.toUpperCase()] || EMOJI_PADRAO;
-    const qtd = Object.keys(TOPICOS).filter(k => k.startsWith(col + ' - ') || k === col).length;
-    btn.innerHTML = `${emoji} ${col}<br><small style="font-weight:normal;opacity:.85">${qtd} volumes</small>`;
-    btn.onclick = () => abrirColecao(col);
-    grid.appendChild(btn);
-  });
+function haptic() {
+  if (tg && tg.HapticFeedback) {
+    tg.HapticFeedback.impactOccurred('light');
+  }
 }
 
+// --- MARCADOR "ONDE PAREI?" ---
+function salvarMarcador(volNome, faixaNum) {
+  const markData = {
+    volume: volNome,
+    faixa: faixaNum,
+    data: new Date().toLocaleDateString('pt-BR')
+  };
+  localStorage.setItem('cr_marcador_escuta', JSON.stringify(markData));
+  if (tg && tg.CloudStorage) {
+    tg.CloudStorage.setItem('cr_marcador_escuta', JSON.stringify(markData));
+  }
+  haptic();
+  alert(`📌 Marcado com sucesso!\n\n📖 Volume: ${volNome}\n🎵 Faixa ${faixaNum}`);
+  // Atualiza exibição se estiver na tela do marcador
+  if (document.getElementById('marcador-card')) {
+    mostrarOndeParei();
+  }
+}
+
+function obterMarcador() {
+  const local = localStorage.getItem('cr_marcador_escuta');
+  return local ? JSON.parse(local) : null;
+}
+
+function mostrarOndeParei() {
+  haptic();
+  const m = obterMarcador();
+  const container = document.getElementById('content-container');
+  
+  if (!m) {
+    container.innerHTML = `
+      <div class="card-box" id="marcador-card">
+        <div class="card-title">📍 SEU MARCADOR DE ESCUTA</div>
+        <div class="card-desc">Você ainda não marcou nenhuma faixa.<br><br>Quando estiver ouvindo um volume, clique nos botões <b>📌 Parei na Faixa X</b> para salvar sua posição automaticamente!</div>
+        <button class="voltar-btn" onclick="resetarParaColecoes()">← Voltar às Coleções</button>
+      </div>
+    `;
+    return;
+  }
+
+  const volNome = m.volume;
+  const threadId = TOPICOS[volNome] || TOPICOS[volNome.toUpperCase()];
+  const link = threadId ? (GROUP_LINK + threadId) : 'https://t.me/CULTURA_RACIONAL_AUDIOS';
+
+  container.innerHTML = `
+    <div class="card-box" id="marcador-card">
+      <div class="card-title">📍 SEU PONTO DE ESCUTA SALVO</div>
+      <div class="card-desc">
+        📖 <b>Volume:</b> ${m.volume}<br>
+        🎵 <b>Posição:</b> Faixa ${m.faixa}<br>
+        📅 <b>Salvo em:</b> ${m.data}
+      </div>
+      <a class="vol-btn-link" href="${link}" target="_blank">▶️ CONTINUAR OUVINDO NO TELEGRAM</a>
+      <br><br>
+      <button class="voltar-btn" onclick="resetarParaColecoes()">← Voltar às Coleções</button>
+    </div>
+  `;
+}
+
+// --- ÁUDIO / VOLUME DO DIA ---
+function sortearAudioDia() {
+  haptic();
+  const chaves = Object.keys(TOPICOS);
+  if (!chaves.length) return;
+  
+  const sorteado = chaves[Math.floor(Math.random() * chaves.length)];
+  const threadId = TOPICOS[sorteado];
+  const link = GROUP_LINK + threadId;
+
+  const container = document.getElementById('content-container');
+  container.innerHTML = `
+    <div class="card-box">
+      <div class="card-title">🎲 SUGGESTÃO DE ESCUTA DO DIA</div>
+      <div class="card-desc">
+        📖 <b>Volume Sorteado:</b> ${sorteado}<br><br>
+        <i>"Leia a Cultura Racional para obter o conhecimento do seu verdadeiro estado natural de Racional."</i>
+      </div>
+      <a class="vol-btn-link" href="${link}" target="_blank">🎧 OUVIR ${sorteado} NO TELEGRAM</a>
+      <br><br>
+      <div style="display:flex; gap:8px;">
+        <button class="voltar-btn" onclick="sortearAudioDia()">🎲 Sortear Outro</button>
+        <button class="voltar-btn" onclick="resetarParaColecoes()">← Coleções</button>
+      </div>
+    </div>
+  `;
+}
+
+// --- BUSCA EXATA E INTELIGENTE ---
 function buscarVolumes(termo) {
   const t = norm(termo).replace(/\s/g, '');
   const mCod = t.match(/^([a-z]+)(\d+)$/);
@@ -505,44 +695,128 @@ function buscarVolumes(termo) {
   });
 }
 
-function mostrarResultados(volumes, tituloColecao) {
-  const div = document.getElementById('results');
-  if (!volumes.length) {
-    div.innerHTML = '<p class="empty">Nenhum volume encontrado.<br>Tente: A01, O15, H050…</p>';
+function executarBusca() {
+  haptic();
+  const termo = document.getElementById('search').value.trim();
+  if (!termo) {
+    resetarParaColecoes();
     return;
   }
-  const voltar = tituloColecao ? `<button class="voltar-btn" onclick="voltar()">← Voltar</button><br>` : '';
-  div.innerHTML = voltar + volumes.slice(0, 50).map(([nome, id]) => {
-    const link = GROUP_LINK + id;
-    return `<a class="vol-item" href="${link}" target="_blank">
-      <div class="vol-title">📖 ${nome}</div>
-      <div class="vol-sub">Toque para abrir os áudios no Telegram</div>
-    </a>`;
-  }).join('');
+  const resultados = buscarVolumes(termo);
+  renderizarResultados(resultados, `Resultados para "${termo}"`);
 }
 
-function buscar() {
-  const termo = document.getElementById('search').value.trim();
-  if (!termo) return;
-  mostrarResultados(buscarVolumes(termo), null);
+function focarBusca() {
+  haptic();
+  const input = document.getElementById('search');
+  input.focus();
+  input.scrollIntoView({ behavior: 'smooth' });
+}
+
+// --- EXIBIÇÃO DE RESULTADOS & PAGINAÇÃO EM LOTES (HISTÓRICO) ---
+function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
+  const container = document.getElementById('content-container');
+  if (!lista.length) {
+    container.innerHTML = `
+      <div class="empty">
+        ❌ Nenhum volume encontrado para a busca.<br><br>
+        Tente digitar: <b>A01</b>, <b>O15</b>, <b>H050</b> ou um número como <b>15</b>.
+        <br><br>
+        <button class="voltar-btn" onclick="resetarParaColecoes()">← Ver Coleções</button>
+      </div>
+    `;
+    return;
+  }
+
+  const total = lista.length;
+  const totalPaginas = Math.ceil(total / loteTam);
+  const inicio = (pagina - 1) * loteTam;
+  const fim = Math.min(inicio + loteTam, total);
+  const itensPagina = lista.slice(inicio, fim);
+
+  let html = `<button class="voltar-btn" onclick="resetarParaColecoes()">← Voltar às Coleções</button>`;
+  html += `<div style="font-size:0.9em; font-weight:bold; margin-bottom:12px; color:var(--text-secondary);">${titulo} (${total} volumes):</div>`;
+
+  itensPagina.forEach(([nome, id]) => {
+    const link = GROUP_LINK + id;
+    html += `
+      <div class="vol-item">
+        <div class="vol-header">
+          <span class="vol-title">📖 ${nome}</span>
+        </div>
+        <a class="vol-btn-link" href="${link}" target="_blank">🎧 ABRIR NO TELEGRAM</a>
+        
+        <div class="faixas-marks">
+          <span style="font-size:0.75em; color:var(--text-secondary); width:100%;">Marcar onde parou neste volume:</span>
+          ${[1,2,3,4,5].map(f => `<button class="mark-chip" onclick="salvarMarcador('${nome}', ${f})">📌 Parei F.${f}</button>`).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  if (totalPaginas > 1) {
+    html += `<div class="pagination">`;
+    if (pagina > 1) {
+      html += `<button class="page-btn" onclick="mudarPagina('${titulo}', ${pagina - 1})">◀️ Anterior</button>`;
+    }
+    html += `<span style="font-size:0.85em; align-self:center; color:var(--text-secondary);">${pagina} / ${totalPaginas}</span>`;
+    if (pagina < totalPaginas) {
+      html += `<button class="page-btn" onclick="mudarPagina('${titulo}', ${pagina + 1})">Próximo ▶️</button>`;
+    }
+    html += `</div>`;
+  }
+
+  container.innerHTML = html;
+  // Guarda resultados para paginação
+  window.currentLista = lista;
+}
+
+function mudarPagina(titulo, novaPagina) {
+  haptic();
+  if (window.currentLista) {
+    renderizarResultados(window.currentLista, titulo, novaPagina);
+  }
 }
 
 function abrirColecao(col) {
+  haptic();
   const volumes = Object.entries(TOPICOS).filter(([n]) => n.startsWith(col + ' - ') || n === col);
-  mostrarResultados(volumes, col);
   document.getElementById('search').value = col;
+  renderizarResultados(volumes, `Coleção ${col}`);
 }
 
-function voltar() {
-  document.getElementById('results').innerHTML = '';
+function resetarParaColecoes() {
+  haptic();
   document.getElementById('search').value = '';
+  const container = document.getElementById('content-container');
+  container.innerHTML = `<div class="colecoes-grid" id="colecoes-grid"></div>`;
+  montarBotoesColecoes();
+}
+
+function montarBotoesColecoes() {
+  const cols = [...new Set(Object.keys(TOPICOS).map(n => n.includes(' - ') ? n.split(' - ')[0].trim() : n.strip()))].sort();
+  const grid = document.getElementById('colecoes-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  cols.forEach((col, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'col-card ' + cssClass(col);
+    if (cols.length % 2 !== 0 && idx === cols.length - 1) btn.classList.add('col-span2');
+    
+    const emoji = EMOJIS[col.toUpperCase()] || EMOJI_PADRAO;
+    const qtd = Object.keys(TOPICOS).filter(k => k.startsWith(col + ' - ') || k === col).length;
+    btn.innerHTML = `${emoji} ${col}<br><small style="font-weight:normal; opacity:0.85;">${qtd} Vols disponíveis</small>`;
+    btn.onclick = () => abrirColecao(col);
+    grid.appendChild(btn);
+  });
 }
 
 document.getElementById('search').addEventListener('keyup', e => {
-  if (e.key === 'Enter') buscar();
+  if (e.key === 'Enter') executarBusca();
 });
 
-// Inicializa botões de coleções ao carregar
+// Inicialização
 montarBotoesColecoes();
 </script>
 </body>
