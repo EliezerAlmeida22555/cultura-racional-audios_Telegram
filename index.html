@@ -148,15 +148,16 @@
   .vol-btn-link {
     display: inline-block;
     margin-top: 8px;
-    padding: 8px 12px;
+    padding: 10px 12px;
     border-radius: 8px;
     background: var(--tg-theme-button-color, var(--accent));
     color: var(--tg-theme-button-text-color, #fff);
-    font-size: 0.85em;
-    font-weight: 600;
+    font-size: 0.88em;
+    font-weight: 700;
     text-decoration: none;
     text-align: center;
     width: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
   /* Botões de Marcador de Faixas */
@@ -172,7 +173,7 @@
     background: var(--bg-input);
     color: var(--text-secondary);
     border: none;
-    padding: 5px 10px;
+    padding: 6px 10px;
     border-radius: 6px;
     font-size: 0.78em;
     cursor: pointer;
@@ -211,6 +212,24 @@
     font-size: 0.85em;
     cursor: pointer;
     border: none;
+  }
+
+  .action-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .action-btn {
+    flex: 1;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.82em;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
   }
 
   .empty { text-align: center; color: var(--tg-theme-hint-color, var(--text-secondary)); padding: 24px 0; font-size: 0.9em; }
@@ -552,6 +571,7 @@ const TOPICOS = {
   "HISTÓRICO - H238": 3586,
   "HISTÓRICO - H239": 3594,
   "HISTÓRICO - H240": 3630,
+  "HISTÓRICO - H241": 3690,
   "MUSICAS": 119
 };
 
@@ -587,11 +607,22 @@ function haptic() {
   }
 }
 
+// Busca inteligente do ID do tópico no dicionário TOPICOS
+function obterThreadId(volNome) {
+  if (!volNome) return null;
+  if (TOPICOS[volNome]) return TOPICOS[volNome];
+  const n = norm(volNome);
+  for (const [k, v] of Object.entries(TOPICOS)) {
+    if (norm(k) === n) return v;
+  }
+  return null;
+}
+
 // --- MARCADOR "ONDE PAREI?" ---
-function salvarMarcador(volNome, faixaNum) {
+function salvarMarcadorSemAlert(volNome, faixaNum) {
   const markData = {
     volume: volNome,
-    faixa: faixaNum,
+    faixa: parseInt(faixaNum) || 1,
     data: new Date().toLocaleDateString('pt-BR')
   };
   localStorage.setItem('cr_marcador_escuta', JSON.stringify(markData));
@@ -599,6 +630,10 @@ function salvarMarcador(volNome, faixaNum) {
     tg.CloudStorage.setItem('cr_marcador_escuta', JSON.stringify(markData));
   }
   haptic();
+}
+
+function salvarMarcador(volNome, faixaNum) {
+  salvarMarcadorSemAlert(volNome, faixaNum);
   alert(`📌 Marcado com sucesso!\n\n📖 Volume: ${volNome}\n🎵 Faixa ${faixaNum}`);
   if (document.getElementById('marcador-card')) {
     mostrarOndeParei();
@@ -608,6 +643,28 @@ function salvarMarcador(volNome, faixaNum) {
 function obterMarcador() {
   const local = localStorage.getItem('cr_marcador_escuta');
   return local ? JSON.parse(local) : null;
+}
+
+function avancarFaixa() {
+  const m = obterMarcador();
+  if (!m) return;
+  const novaFaixa = (m.faixa || 1) + 1;
+  salvarMarcadorSemAlert(m.volume, novaFaixa);
+  mostrarOndeParei();
+}
+
+function proximoVolume() {
+  const m = obterMarcador();
+  if (!m) return;
+  const chaves = Object.keys(TOPICOS);
+  const idxAtual = chaves.findIndex(k => norm(k) === norm(m.volume));
+  if (idxAtual !== -1 && idxAtual + 1 < chaves.length) {
+    const proxVol = chaves[idxAtual + 1];
+    salvarMarcadorSemAlert(proxVol, 1);
+    mostrarOndeParei();
+  } else {
+    alert('Você já está no último volume disponível!');
+  }
 }
 
 function mostrarOndeParei() {
@@ -627,7 +684,7 @@ function mostrarOndeParei() {
   }
 
   const volNome = m.volume;
-  const threadId = TOPICOS[volNome] || TOPICOS[volNome.toUpperCase()];
+  const threadId = obterThreadId(volNome);
   const link = threadId ? (GROUP_LINK + threadId) : 'https://t.me/CULTURA_RACIONAL_AUDIOS';
 
   container.innerHTML = `
@@ -636,10 +693,19 @@ function mostrarOndeParei() {
       <div class="card-desc">
         📖 <b>Volume:</b> ${m.volume}<br>
         🎵 <b>Posição:</b> Faixa ${m.faixa}<br>
-        📅 <b>Salvo em:</b> ${m.data}
+        📅 <b>Marcado em:</b> ${m.data}
       </div>
-      <a class="vol-btn-link" href="${link}" target="_blank">▶️ CONTINUAR OUVINDO NO TELEGRAM</a>
-      <br><br>
+      
+      <a class="vol-btn-link" href="${link}" target="_blank" style="background:#22c55e;">
+        ▶️ IR PARA ${m.volume} (FAIXA ${m.faixa}) NO TELEGRAM
+      </a>
+
+      <div class="action-row">
+        <button class="action-btn" onclick="avancarFaixa()">⏩ Próxima Faixa (${m.faixa + 1})</button>
+        <button class="action-btn" onclick="proximoVolume()">⏭️ Próximo Volume</button>
+      </div>
+
+      <br>
       <button class="voltar-btn" onclick="resetarParaColecoes()">← Voltar às Coleções</button>
     </div>
   `;
@@ -652,8 +718,8 @@ function sortearAudioDia() {
   if (!chaves.length) return;
   
   const sorteado = chaves[Math.floor(Math.random() * chaves.length)];
-  const threadId = TOPICOS[sorteado];
-  const link = GROUP_LINK + threadId;
+  const threadId = obterThreadId(sorteado);
+  const link = threadId ? (GROUP_LINK + threadId) : 'https://t.me/CULTURA_RACIONAL_AUDIOS';
 
   const container = document.getElementById('content-container');
   container.innerHTML = `
@@ -744,7 +810,7 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
         <div class="vol-header">
           <span class="vol-title">📖 ${nome}</span>
         </div>
-        <a class="vol-btn-link" href="${link}" target="_blank">🎧 ABRIR NO TELEGRAM</a>
+        <a class="vol-btn-link" href="${link}" target="_blank">🎧 ABRIR ${nome} NO TELEGRAM</a>
         
         <div class="faixas-marks">
           <span style="font-size:0.75em; color:var(--text-secondary); width:100%;">Marcar onde parou neste volume:</span>
