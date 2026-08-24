@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navegador de Áudios — Cultura Racional</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: var(--tg-theme-bg-color, #1a1a2e);
+    color: var(--tg-theme-text-color, #ffffff);
+    min-height: 100vh;
+    padding: 16px;
+  }
+  h1 {
+    font-size: 1.2em;
+    text-align: center;
+    margin-bottom: 6px;
+    color: var(--tg-theme-text-color, #fff);
+  }
+  .subtitle {
+    font-size: 0.85em;
+    text-align: center;
+    color: var(--tg-theme-hint-color, #aaa);
+    margin-bottom: 20px;
+  }
+  .search-box {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  input[type="text"] {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: none;
+    background: var(--tg-theme-secondary-bg-color, #16213e);
+    color: var(--tg-theme-text-color, #fff);
+    font-size: 1em;
+    outline: none;
+  }
+  input::placeholder { color: var(--tg-theme-hint-color, #888); }
+  button.search-btn {
+    padding: 12px 18px;
+    border-radius: 12px;
+    border: none;
+    background: var(--tg-theme-button-color, #4a90d9);
+    color: var(--tg-theme-button-text-color, #fff);
+    font-size: 1em;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .colecoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .col-btn {
+    padding: 14px 10px;
+    border-radius: 14px;
+    border: none;
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .col-span2 { grid-column: span 2; }
+
+  /* Cores fixas para coleções conhecidas, fallback para novas */
+  .col-AMARELÕES  { background: #b8860b; }
+  .col-OBRA       { background: #2e7d32; }
+  .col-RÉPLICA    { background: #b71c1c; }
+  .col-TRÉPLICA   { background: #1565c0; }
+  .col-HISTÓRICO  { background: #6a1b9a; }
+  .col-MUSICAS    { background: #00695c; }
+  .col-default    { background: #37474f; }
+
+  .results { margin-top: 4px; }
+  .vol-item {
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--tg-theme-secondary-bg-color, #16213e);
+    margin-bottom: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    color: var(--tg-theme-text-color, #fff);
+    border-left: 4px solid var(--tg-theme-button-color, #4a90d9);
+  }
+  .vol-title { font-weight: bold; font-size: 1em; }
+  .vol-sub   { font-size: 0.8em; color: var(--tg-theme-hint-color, #aaa); margin-top: 4px; }
+  .empty { text-align: center; color: var(--tg-theme-hint-color, #aaa); padding: 30px 0; }
+  .header-icon { font-size: 2em; text-align: center; margin-bottom: 6px; }
+  .voltar-btn {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: var(--tg-theme-secondary-bg-color, #16213e);
+    color: var(--tg-theme-text-color, #fff);
+    font-size: 0.9em;
+    cursor: pointer;
+    border: none;
+  }
+</style>
+</head>
+<body>
+<div class="header-icon">🎧</div>
+<h1>Navegador de Áudios</h1>
+<p class="subtitle">Cultura Racional — Encontre qualquer volume</p>
+
+<div class="search-box">
+  <input type="text" id="search" placeholder="Ex: A01, O15, H050, Musicas..." />
+  <button class="search-btn" onclick="buscar()">🔍</button>
+</div>
+
+<div class="colecoes" id="colecoes-grid">
+  <!-- Gerado dinamicamente pelo JS abaixo -->
+</div>
+
+<div class="results" id="results"></div>
+
+<script>
+const GROUP_LINK = 'https://t.me/c/4415417039/';
+const TOPICOS = {
+  "OBRA - O17": 694,
+  "OBRA - O18": 716,
+  "OBRA - O19": 733,
+  "OBRA - O01": 754,
+  "OBRA - O02": 820,
+  "OBRA - O03": 844,
+  "OBRA - O04": 861,
+  "OBRA - O05": 882,
+  "OBRA - O06": 909,
+  "OBRA - O07": 934,
+  "OBRA - O08": 952,
+  "OBRA - O09": 975,
+  "OBRA - O10": 994,
+  "OBRA - O11": 1022,
+  "OBRA - O12": 1040,
+  "OBRA - O13": 1060,
+  "OBRA - O14": 1079,
+  "OBRA - O15": 1097,
+  "OBRA - O16": 1118,
+  "OBRA - O21": 1156,
+  "OBRA - O20": 1179,
+  "RÉPLICA - R01": 1197,
+  "TRÉPLICA - T01": 1208,
+  "HISTÓRICO - H001": 1217,
+  "AMARELÕES - A02": 1224,
+  "AMARELÕES - A03": 1416,
+  "RÉPLICA - R02": 1517,
+  "RÉPLICA - R03": 1533,
+  "RÉPLICA - R04": 1544,
+  "RÉPLICA - R05": 1561,
+  "RÉPLICA - R06": 1584,
+  "RÉPLICA - R07": 1603,
+  "RÉPLICA - R08": 1624,
+  "RÉPLICA - R09": 1637,
+  "RÉPLICA - R10": 1648,
+  "RÉPLICA - R11": 1658,
+  "RÉPLICA - R12": 1665,
+  "RÉPLICA - R13": 1676,
+  "RÉPLICA - R14": 1685,
+  "RÉPLICA - R15": 1697,
+  "RÉPLICA - R16": 1702,
+  "RÉPLICA - R17": 1709,
+  "RÉPLICA - R18": 1717,
+  "RÉPLICA - R19": 1723,
+  "RÉPLICA - R20": 1729,
+  "RÉPLICA - R21": 1736,
+  "TRÉPLICA - T02": 1742,
+  "TRÉPLICA - T03": 1749,
+  "TRÉPLICA - T04": 1755,
+  "TRÉPLICA - T05": 1760,
+  "TRÉPLICA - T06": 1767,
+  "TRÉPLICA - T07": 1772,
+  "TRÉPLICA - T08": 1778,
+  "TRÉPLICA - T09": 1784,
+  "TRÉPLICA - T10": 1791,
+  "TRÉPLICA - T11": 1796,
+  "TRÉPLICA - T12": 1802,
+  "TRÉPLICA - T13": 1808,
+  "TRÉPLICA - T14": 1815,
+  "TRÉPLICA - T15": 1820,
+  "TRÉPLICA - T16": 1826,
+  "TRÉPLICA - T17": 1831,
+  "TRÉPLICA - T18": 1836,
+  "TRÉPLICA - T19": 1841,
+  "TRÉPLICA - T20": 1846,
+  "TRÉPLICA - T21": 1851,
+  "HISTÓRICO - H002": 1855,
+  "HISTÓRICO - H003": 1861,
+  "HISTÓRICO - H004": 1867,
+  "HISTÓRICO - H005": 1875,
+  "HISTÓRICO - H006": 1881,
+  "HISTÓRICO - H007": 1887,
+  "HISTÓRICO - H008": 1893,
+  "HISTÓRICO - H009": 1896,
+  "HISTÓRICO - H010": 1902,
+  "HISTÓRICO - H011": 1910,
+  "HISTÓRICO - H012": 1916,
+  "HISTÓRICO - H013": 1922,
+  "HISTÓRICO - H014": 1927,
+  "HISTÓRICO - H015": 1932,
+  "HISTÓRICO - H016": 1937,
+  "HISTÓRICO - H017": 1941,
+  "HISTÓRICO - H018": 1945,
+  "HISTÓRICO - H019": 1950,
+  "HISTÓRICO - H020": 1956,
+  "HISTÓRICO - H021": 1962,
+  "HISTÓRICO - H022": 1967,
+  "HISTÓRICO - H023": 1973,
+  "HISTÓRICO - H024": 1979,
+  "HISTÓRICO - H025": 1985,
+  "HISTÓRICO - H026": 1991,
+  "HISTÓRICO - H027": 1997,
+  "HISTÓRICO - H028": 2003,
+  "HISTÓRICO - H029": 2009,
+  "HISTÓRICO - H030": 2015,
+  "HISTÓRICO - H031": 2021,
+  "HISTÓRICO - H032": 2027,
+  "HISTÓRICO - H033": 2033,
+  "HISTÓRICO - H034": 2039,
+  "HISTÓRICO - H035": 2044,
+  "HISTÓRICO - H036": 2049,
+  "HISTÓRICO - H037": 2053,
+  "HISTÓRICO - H038": 2059,
+  "HISTÓRICO - H039": 2065,
+  "HISTÓRICO - H040": 2071,
+  "HISTÓRICO - H041": 2077,
+  "HISTÓRICO - H042": 2083,
+  "HISTÓRICO - H043": 2090,
+  "HISTÓRICO - H044": 2096,
+  "HISTÓRICO - H045": 2102,
+  "HISTÓRICO - H046": 2108,
+  "HISTÓRICO - H047": 2114,
+  "HISTÓRICO - H048": 2120,
+  "HISTÓRICO - H049": 2126,
+  "HISTÓRICO - H050": 2132,
+  "HISTÓRICO - H051": 2138,
+  "HISTÓRICO - H052": 2144,
+  "HISTÓRICO - H053": 2150,
+  "HISTÓRICO - H054": 2156,
+  "HISTÓRICO - H055": 2162,
+  "HISTÓRICO - H056": 2168,
+  "HISTÓRICO - H057": 2174,
+  "HISTÓRICO - H058": 2181,
+  "HISTÓRICO - H059": 2187,
+  "HISTÓRICO - H060": 2193,
+  "HISTÓRICO - H061": 2199,
+  "HISTÓRICO - H062": 2205,
+  "HISTÓRICO - H063": 2211,
+  "HISTÓRICO - H064": 2219,
+  "HISTÓRICO - H065": 2226,
+  "HISTÓRICO - H066": 2232,
+  "HISTÓRICO - H067": 2238,
+  "HISTÓRICO - H068": 2244,
+  "HISTÓRICO - H069": 2250,
+  "HISTÓRICO - H070": 2256,
+  "HISTÓRICO - H071": 2262,
+  "HISTÓRICO - H072": 2268,
+  "HISTÓRICO - H073": 2274,
+  "HISTÓRICO - H074": 2280,
+  "HISTÓRICO - H075": 2286,
+  "HISTÓRICO - H076": 2292,
+  "HISTÓRICO - H077": 2298,
+  "HISTÓRICO - H078": 2304,
+  "HISTÓRICO - H079": 2310,
+  "HISTÓRICO - H080": 2316,
+  "HISTÓRICO - H081": 2322,
+  "HISTÓRICO - H082": 2328,
+  "HISTÓRICO - H083": 2334,
+  "HISTÓRICO - H084": 2340,
+  "HISTÓRICO - H085": 2346,
+  "HISTÓRICO - H086": 2352,
+  "HISTÓRICO - H087": 2358,
+  "HISTÓRICO - H088": 2364,
+  "HISTÓRICO - H089": 2370,
+  "HISTÓRICO - H090": 2376,
+  "HISTÓRICO - H091": 2382,
+  "HISTÓRICO - H092": 2388,
+  "HISTÓRICO - H093": 2394,
+  "HISTÓRICO - H094": 2401,
+  "HISTÓRICO - H095": 2406,
+  "HISTÓRICO - H096": 2412,
+  "HISTÓRICO - H097": 2418,
+  "HISTÓRICO - H098": 2424,
+  "HISTÓRICO - H099": 2431,
+  "HISTÓRICO - H100": 2437,
+  "HISTÓRICO - H101": 2444,
+  "HISTÓRICO - H102": 2450,
+  "HISTÓRICO - H103": 2457,
+  "HISTÓRICO - H104": 2462,
+  "HISTÓRICO - H105": 2468,
+  "HISTÓRICO - H106": 2474,
+  "HISTÓRICO - H107": 2479,
+  "HISTÓRICO - H108": 2485,
+  "HISTÓRICO - H109": 2491,
+  "HISTÓRICO - H110": 2497,
+  "HISTÓRICO - H111": 2503,
+  "HISTÓRICO - H112": 2509,
+  "HISTÓRICO - H113": 2515,
+  "HISTÓRICO - H114": 2521,
+  "HISTÓRICO - H115": 2527,
+  "HISTÓRICO - H116": 2533,
+  "HISTÓRICO - H117": 2539,
+  "HISTÓRICO - H118": 2545,
+  "HISTÓRICO - H119": 2551,
+  "HISTÓRICO - H120": 2557,
+  "HISTÓRICO - H121": 2563,
+  "HISTÓRICO - H122": 2569,
+  "HISTÓRICO - H123": 2575,
+  "HISTÓRICO - H124": 2582,
+  "HISTÓRICO - H125": 2588,
+  "HISTÓRICO - H126": 2593,
+  "HISTÓRICO - H127": 2600,
+  "HISTÓRICO - H128": 2607,
+  "HISTÓRICO - H129": 2615,
+  "HISTÓRICO - H130": 2621,
+  "HISTÓRICO - H131": 2627,
+  "HISTÓRICO - H132": 2633,
+  "HISTÓRICO - H133": 2639,
+  "HISTÓRICO - H134": 2645,
+  "HISTÓRICO - H135": 2652,
+  "HISTÓRICO - H136": 2658,
+  "HISTÓRICO - H137": 2664,
+  "HISTÓRICO - H138": 2675,
+  "HISTÓRICO - H139": 2681,
+  "HISTÓRICO - H140": 2687,
+  "HISTÓRICO - H141": 2693,
+  "HISTÓRICO - H142": 2699,
+  "HISTÓRICO - H143": 2705,
+  "HISTÓRICO - H144": 2711,
+  "HISTÓRICO - H145": 2718,
+  "HISTÓRICO - H146": 2724,
+  "HISTÓRICO - H147": 2730,
+  "HISTÓRICO - H148": 2737,
+  "HISTÓRICO - H149": 2743,
+  "HISTÓRICO - H150": 2750,
+  "HISTÓRICO - H151": 2765,
+  "HISTÓRICO - H152": 2776,
+  "HISTÓRICO - H153": 2784,
+  "HISTÓRICO - H154": 2792,
+  "HISTÓRICO - H155": 2817,
+  "AMARELÕES - A01": 668,
+  "HISTÓRICO - H156": 2920,
+  "HISTÓRICO - H157": 2927,
+  "HISTÓRICO - H158": 2933,
+  "HISTÓRICO - H159": 2940,
+  "HISTÓRICO - H160": 2947,
+  "HISTÓRICO - H161": 2954,
+  "HISTÓRICO - H162": 2960,
+  "HISTÓRICO - H163": 2968,
+  "HISTÓRICO - H164": 2973,
+  "HISTÓRICO - H165": 2980,
+  "HISTÓRICO - H166": 2987,
+  "HISTÓRICO - H167": 2996,
+  "HISTÓRICO - H168": 3007,
+  "HISTÓRICO - H169": 3013,
+  "HISTÓRICO - H170": 3020,
+  "HISTÓRICO - H171": 3028,
+  "HISTÓRICO - H172": 3035,
+  "HISTÓRICO - H173": 3043,
+  "HISTÓRICO - H174": 3049,
+  "HISTÓRICO - H175": 3058,
+  "HISTÓRICO - H176": 3065,
+  "HISTÓRICO - H177": 3072,
+  "HISTÓRICO - H178": 3082,
+  "HISTÓRICO - H179": 3090,
+  "HISTÓRICO - H180": 3097,
+  "HISTÓRICO - H181": 3105,
+  "HISTÓRICO - H182": 3115,
+  "HISTÓRICO - H183": 3124,
+  "HISTÓRICO - H184": 3132,
+  "HISTÓRICO - H185": 3142,
+  "HISTÓRICO - H186": 3149,
+  "HISTÓRICO - H187": 3159,
+  "HISTÓRICO - H188": 3166,
+  "HISTÓRICO - H189": 3173,
+  "HISTÓRICO - H190": 3181,
+  "HISTÓRICO - H191": 3191,
+  "HISTÓRICO - H192": 3198,
+  "HISTÓRICO - H193": 3204,
+  "HISTÓRICO - H194": 3214,
+  "HISTÓRICO - H195": 3221,
+  "HISTÓRICO - H196": 3228,
+  "HISTÓRICO - H197": 3234,
+  "HISTÓRICO - H198": 3242,
+  "HISTÓRICO - H199": 3249,
+  "HISTÓRICO - H200": 3255,
+  "HISTÓRICO - H201": 3263,
+  "HISTÓRICO - H202": 3273,
+  "HISTÓRICO - H203": 3281,
+  "HISTÓRICO - H204": 3289,
+  "HISTÓRICO - H205": 3296,
+  "HISTÓRICO - H206": 3303,
+  "HISTÓRICO - H207": 3310,
+  "HISTÓRICO - H208": 3319,
+  "HISTÓRICO - H209": 3329,
+  "HISTÓRICO - H210": 3337,
+  "HISTÓRICO - H211": 3344,
+  "HISTÓRICO - H212": 3351,
+  "HISTÓRICO - H213": 3358,
+  "HISTÓRICO - H214": 3365,
+  "HISTÓRICO - H215": 3370,
+  "HISTÓRICO - H216": 3379,
+  "HISTÓRICO - H217": 3386,
+  "HISTÓRICO - H218": 3394,
+  "HISTÓRICO - H219": 3402,
+  "HISTÓRICO - H220": 3409,
+  "HISTÓRICO - H221": 3417,
+  "HISTÓRICO - H222": 3424,
+  "HISTÓRICO - H223": 3449,
+  "HISTÓRICO - H224": 3456,
+  "HISTÓRICO - H225": 3464,
+  "HISTÓRICO - H226": 3472,
+  "HISTÓRICO - H227": 3479,
+  "HISTÓRICO - H228": 3486,
+  "HISTÓRICO - H229": 3495,
+  "HISTÓRICO - H230": 3503,
+  "HISTÓRICO - H231": 3512,
+  "HISTÓRICO - H232": 3519,
+  "HISTÓRICO - H233": 3525,
+  "MUSICAS": 119
+};
+
+// Emojis por coleção
+const EMOJIS = {
+  'AMARELÕES': '🟡', 'OBRA': '🟢', 'RÉPLICA': '🔴',
+  'TRÉPLICA': '🔵', 'HISTÓRICO': '🟣', 'MUSICAS': '🎵'
+};
+const EMOJI_PADRAO = '📁';
+
+// CSS class por coleção (sanitiza para usar como classe CSS)
+function cssClass(nome) {
+  const known = ['AMARELÕES','OBRA','RÉPLICA','TRÉPLICA','HISTÓRICO','MUSICAS'];
+  return known.includes(nome.toUpperCase()) ? `col-${nome}` : 'col-default';
+}
+
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) tg.ready();
+
+function norm(s) {
+  return s.toLowerCase().normalize('NFC').trim();
+}
+
+function extrairNum(s) {
+  const m = s.match(/\d+/);
+  return m ? parseInt(m[0]) : -1;
+}
+
+// Detecta coleções automaticamente dos tópicos
+function detectarColecoes() {
+  const cols = new Set();
+  Object.keys(TOPICOS).forEach(nome => {
+    const col = nome.includes(' - ') ? nome.split(' - ')[0].trim() : nome.trim();
+    cols.add(col);
+  });
+  return [...cols].sort();
+}
+
+// Monta botões de coleções dinamicamente
+function montarBotoesColecoes() {
+  const cols = detectarColecoes();
+  const grid = document.getElementById('colecoes-grid');
+  grid.innerHTML = '';
+
+  cols.forEach((col, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'col-btn ' + cssClass(col);
+    // Coleção ímpar no final sozinha ocupa 2 colunas
+    if (cols.length % 2 !== 0 && idx === cols.length - 1) btn.classList.add('col-span2');
+    const emoji = EMOJIS[col.toUpperCase()] || EMOJI_PADRAO;
+    const qtd = Object.keys(TOPICOS).filter(k => k.startsWith(col + ' - ') || k === col).length;
+    btn.innerHTML = `${emoji} ${col}<br><small style="font-weight:normal;opacity:.85">${qtd} volumes</small>`;
+    btn.onclick = () => abrirColecao(col);
+    grid.appendChild(btn);
+  });
+}
+
+function buscarVolumes(termo) {
+  const t = norm(termo).replace(/\s/g, '');
+  const mCod = t.match(/^([a-z]+)(\d+)$/);
+  let colEstrita = null, numEstrito = null;
+
+  if (mCod) {
+    const PREFIXOS = { a: 'AMARELÕES', o: 'OBRA', r: 'RÉPLICA', t: 'TRÉPLICA', h: 'HISTÓRICO', m: 'MUSICAS' };
+    const col = PREFIXOS[mCod[1]];
+    if (col) { colEstrita = col; numEstrito = parseInt(mCod[2]); }
+  }
+
+  return Object.entries(TOPICOS).filter(([nome, id]) => {
+    const nNorm = norm(nome);
+    if (colEstrita && numEstrito !== null) {
+      return nNorm.includes(norm(colEstrita)) && extrairNum(nome) === numEstrito;
+    }
+    if (colEstrita) return nNorm.includes(norm(colEstrita));
+    return nNorm.includes(norm(termo)) || extrairNum(nome) === extrairNum(termo);
+  });
+}
+
+function mostrarResultados(volumes, tituloColecao) {
+  const div = document.getElementById('results');
+  if (!volumes.length) {
+    div.innerHTML = '<p class="empty">Nenhum volume encontrado.<br>Tente: A01, O15, H050…</p>';
+    return;
+  }
+  const voltar = tituloColecao ? `<button class="voltar-btn" onclick="voltar()">← Voltar</button><br>` : '';
+  div.innerHTML = voltar + volumes.slice(0, 50).map(([nome, id]) => {
+    const link = GROUP_LINK + id;
+    return `<a class="vol-item" href="${link}" target="_blank">
+      <div class="vol-title">📖 ${nome}</div>
+      <div class="vol-sub">Toque para abrir os áudios no Telegram</div>
+    </a>`;
+  }).join('');
+}
+
+function buscar() {
+  const termo = document.getElementById('search').value.trim();
+  if (!termo) return;
+  mostrarResultados(buscarVolumes(termo), null);
+}
+
+function abrirColecao(col) {
+  const volumes = Object.entries(TOPICOS).filter(([n]) => n.startsWith(col + ' - ') || n === col);
+  mostrarResultados(volumes, col);
+  document.getElementById('search').value = col;
+}
+
+function voltar() {
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('search').value = '';
+}
+
+document.getElementById('search').addEventListener('keyup', e => {
+  if (e.key === 'Enter') buscar();
+});
+
+// Inicializa botões de coleções ao carregar
+montarBotoesColecoes();
+</script>
+</body>
+</html>
