@@ -217,7 +217,7 @@
   .action-row {
     display: flex;
     gap: 8px;
-    margin-top: 10px;
+    margin-top: 12px;
   }
   .action-btn {
     flex: 1;
@@ -660,8 +660,10 @@ const EMOJI_PADRAO = '📁';
 
 const tg = window.Telegram && window.Telegram.WebApp;
 if (tg) {
-  tg.ready();
-  tg.expand();
+  try {
+    tg.ready();
+    tg.expand();
+  } catch(e) {}
 }
 
 function norm(s) {
@@ -679,9 +681,11 @@ function cssClass(nome) {
 }
 
 function haptic() {
-  if (tg && tg.HapticFeedback) {
-    tg.HapticFeedback.impactOccurred('light');
-  }
+  try {
+    if (tg && tg.HapticFeedback) {
+      tg.HapticFeedback.impactOccurred('light');
+    }
+  } catch(e) {}
 }
 
 // Busca inteligente do ID do tópico no dicionário TOPICOS
@@ -702,10 +706,16 @@ function salvarMarcadorSemAlert(volNome, faixaNum) {
     faixa: parseInt(faixaNum) || 1,
     data: new Date().toLocaleDateString('pt-BR')
   };
-  localStorage.setItem('cr_marcador_escuta', JSON.stringify(markData));
-  if (tg && tg.CloudStorage) {
-    tg.CloudStorage.setItem('cr_marcador_escuta', JSON.stringify(markData));
-  }
+  try {
+    localStorage.setItem('cr_marcador_escuta', JSON.stringify(markData));
+  } catch(e) {}
+
+  try {
+    if (tg && tg.CloudStorage && typeof tg.CloudStorage.setItem === 'function') {
+      tg.CloudStorage.setItem('cr_marcador_escuta', JSON.stringify(markData), function() {});
+    }
+  } catch(e) {}
+
   haptic();
 }
 
@@ -718,28 +728,52 @@ function salvarMarcador(volNome, faixaNum) {
 }
 
 function obterMarcador() {
-  const local = localStorage.getItem('cr_marcador_escuta');
-  return local ? JSON.parse(local) : null;
+  try {
+    const local = localStorage.getItem('cr_marcador_escuta');
+    return local ? JSON.parse(local) : null;
+  } catch(e) {
+    return null;
+  }
 }
 
 function avancarFaixa() {
   const m = obterMarcador();
-  if (!m) return;
-  const novaFaixa = (m.faixa || 1) + 1;
+  if (!m) {
+    alert('Nenhum volume marcado ainda.');
+    return;
+  }
+  const novaFaixa = (parseInt(m.faixa) || 1) + 1;
   salvarMarcadorSemAlert(m.volume, novaFaixa);
   mostrarOndeParei();
 }
 
 function proximoVolume() {
   const m = obterMarcador();
-  if (!m) return;
+  if (!m) {
+    alert('Nenhum volume marcado ainda.');
+    return;
+  }
   const chaves = Object.keys(TOPICOS);
   const idxAtual = chaves.findIndex(k => norm(k) === norm(m.volume));
+  
   if (idxAtual !== -1 && idxAtual + 1 < chaves.length) {
     const proxVol = chaves[idxAtual + 1];
     salvarMarcadorSemAlert(proxVol, 1);
     mostrarOndeParei();
   } else {
+    // Tenta avançar por código numérico de coleção (ex: AMARELÕES - A01 -> A02)
+    const mCod = norm(m.volume).match(/^([a-z]+)\s*-\s*([a-z]*)(\d+)$/);
+    if (mCod) {
+      const colNome = mCod[1];
+      const numAtual = parseInt(mCod[3]);
+      const proxNum = numAtual + 1;
+      const proxChave = chaves.find(k => norm(k).includes(colNome) && extrairNum(k) === proxNum);
+      if (proxChave) {
+        salvarMarcadorSemAlert(proxChave, 1);
+        mostrarOndeParei();
+        return;
+      }
+    }
     alert('Você já está no último volume disponível!');
   }
 }
@@ -763,6 +797,7 @@ function mostrarOndeParei() {
   const volNome = m.volume;
   const threadId = obterThreadId(volNome);
   const link = threadId ? (GROUP_LINK + threadId) : 'https://t.me/CULTURA_RACIONAL_AUDIOS';
+  const proxFaixaNum = (parseInt(m.faixa) || 1) + 1;
 
   container.innerHTML = `
     <div class="card-box" id="marcador-card">
@@ -778,7 +813,7 @@ function mostrarOndeParei() {
       </a>
 
       <div class="action-row">
-        <button class="action-btn" onclick="avancarFaixa()">⏩ Próxima Faixa (${m.faixa + 1})</button>
+        <button class="action-btn" onclick="avancarFaixa()">⏩ Próxima Faixa (${proxFaixaNum})</button>
         <button class="action-btn" onclick="proximoVolume()">⏭️ Próximo Volume</button>
       </div>
 
