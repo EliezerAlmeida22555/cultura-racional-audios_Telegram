@@ -777,18 +777,14 @@ function obterThreadId(volNome) {
   return null;
 }
 
-// Gera o link direto para a Faixa F do Volume no Telegram
+// Gera o link direto para a Faixa F do Volume no Telegram (abre direto na mensagem no topo!)
 function obterLinkFaixa(volNome, faixaNum = 1) {
   const threadId = obterThreadId(volNome);
   if (!threadId) return 'https://t.me/CULTURA_RACIONAL_AUDIOS';
   
-  // Para coleções de tópico único (ex: MUSICAS), o link direto abre o tópico do fórum (ex: ID 119)
-  if (isSingleTopicCollection(volNome)) {
-    return GROUP_LINK + threadId;
-  }
-  
-  // Para coleções com subpastas de volumes (ex: OBRA - O15)
   const f = Math.max(1, parseInt(faixaNum) || 1);
+  // Apontar para o ID de mensagem específico (threadId + 1 + f) força o Telegram
+  // a abrir no TOPO da mensagem do áudio, sem rolar para o final do tópico!
   const msgId = parseInt(threadId) + 1 + f;
   return GROUP_LINK + msgId;
 }
