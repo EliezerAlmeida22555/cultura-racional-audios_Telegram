@@ -175,6 +175,7 @@
     text-align: center;
     width: 100%;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
   }
 
   /* Botões de Marcador de Faixas */
@@ -760,13 +761,24 @@ function haptic() {
   } catch(e) {}
 }
 
-// Verifica se é uma coleção de tópico único (como MUSICAS)
+// Método nativo do Telegram para abrir links nativamente e fechar o WebApp Mini App
+function abrirLinkTelegram(url) {
+  haptic();
+  try {
+    if (tg && typeof tg.openTelegramLink === 'function') {
+      tg.openTelegramLink(url);
+      return false;
+    }
+  } catch(e) {}
+  window.open(url, '_blank');
+  return false;
+}
+
 function isSingleTopicCollection(volNome) {
   if (!volNome) return false;
   return !volNome.includes(' - ');
 }
 
-// Busca o ID do tópico no dicionário TOPICOS
 function obterThreadId(volNome) {
   if (!volNome) return null;
   if (TOPICOS[volNome]) return TOPICOS[volNome];
@@ -777,19 +789,16 @@ function obterThreadId(volNome) {
   return null;
 }
 
-// Gera o link direto para a Faixa F do Volume no Telegram (abre direto na mensagem no topo!)
 function obterLinkFaixa(volNome, faixaNum = 1) {
   const threadId = obterThreadId(volNome);
   if (!threadId) return 'https://t.me/CULTURA_RACIONAL_AUDIOS';
   
   const f = Math.max(1, parseInt(faixaNum) || 1);
-  // Apontar para o ID de mensagem específico (threadId + 1 + f) força o Telegram
-  // a abrir no TOPO da mensagem do áudio, sem rolar para o final do tópico!
   const msgId = parseInt(threadId) + 1 + f;
   return GROUP_LINK + msgId;
 }
 
-// --- GERENCIADOR MULTI-MARCADORES ---
+// --- GERENCIADOR MULTI-MARCADORES (LOCALSTORAGE + TELEGRAM CLOUDSTORAGE) ---
 function obterMarcadores() {
   try {
     const raw = localStorage.getItem('cr_marcadores_dict');
@@ -820,6 +829,23 @@ function salvarMarcadoresDict(dict) {
     }
   } catch(e) {}
   haptic();
+}
+
+function carregarCloudStorage(callback) {
+  try {
+    if (tg && tg.CloudStorage && typeof tg.CloudStorage.getItem === 'function') {
+      tg.CloudStorage.getItem('cr_marcadores_dict', function(err, val) {
+        if (!err && val) {
+          try {
+            localStorage.setItem('cr_marcadores_dict', val);
+          } catch(e) {}
+        }
+        if (callback) callback();
+      });
+      return;
+    }
+  } catch(e) {}
+  if (callback) callback();
 }
 
 function salvarMarcador(volNome, faixaNum) {
@@ -915,8 +941,7 @@ function proximoVolumeParaVolume(volNome) {
 }
 
 // --- EXIBIÇÃO DA TELA "ONDE PAREI?" ---
-function mostrarOndeParei() {
-  haptic();
+function renderizarOndePareiView() {
   const dict = obterMarcadores();
   const entradas = Object.entries(dict);
   const container = document.getElementById('content-container');
@@ -943,7 +968,6 @@ function mostrarOndeParei() {
       </div>
   `;
 
-  // Renderiza cada volume com ponto salvo
   entradas.forEach(([volNome, info]) => {
     const faixaAtual = parseInt(info.faixa) || 1;
     const linkFaixa = obterLinkFaixa(volNome, faixaAtual);
@@ -960,11 +984,10 @@ function mostrarOndeParei() {
           📅 <b>Marcado em:</b> ${info.data}
         </div>
         
-        <a class="vol-btn-link" href="${linkFaixa}" target="_blank" style="background:#22c55e;">
+        <a class="vol-btn-link" href="${linkFaixa}" onclick="return abrirLinkTelegram('${linkFaixa}')" target="_blank" style="background:#22c55e;">
           ▶️ IR PARA ${isSingle ? volNome : 'FAIXA ' + faixaAtual + ' DE ' + volNome} NO TELEGRAM
         </a>
 
-        <!-- Controles individuais de navegação para este volume -->
         <div class="ctrl-grid">
           <button class="ctrl-btn" onclick="faixaAnteriorParaVolume('${volNome}')">⏪ Faixa Anterior (${Math.max(1, faixaAtual - 1)})</button>
           <button class="ctrl-btn" onclick="avancarFaixaParaVolume('${volNome}')">⏩ Próxima Faixa (${faixaAtual + 1})</button>
@@ -979,6 +1002,13 @@ function mostrarOndeParei() {
 
   html += `</div>`;
   container.innerHTML = html;
+}
+
+function mostrarOndeParei() {
+  haptic();
+  carregarCloudStorage(function() {
+    renderizarOndePareiView();
+  });
 }
 
 // --- ÁUDIO / VOLUME DO DIA ---
@@ -998,7 +1028,7 @@ function sortearAudioDia() {
         📖 <b>Volume Sorteado:</b> ${sorteado}<br><br>
         <i>"Leia a Cultura Racional para obter o conhecimento do seu verdadeiro estado natural de Racional."</i>
       </div>
-      <a class="vol-btn-link" href="${linkAudio1}" target="_blank">🎧 OUVIR ${sorteado} NO TELEGRAM</a>
+      <a class="vol-btn-link" href="${linkAudio1}" onclick="return abrirLinkTelegram('${linkAudio1}')" target="_blank">🎧 OUVIR ${sorteado} NO TELEGRAM</a>
       <br><br>
       <div style="display:flex; gap:8px;">
         <button class="voltar-btn" onclick="sortearAudioDia()">🎲 Sortear Outro</button>
@@ -1089,14 +1119,13 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
         </div>
     `;
 
-    // Se houver um ponto salvo para este volume, exibe o Badge de Destaque
     if (mSalvo) {
       const linkPonto = obterLinkFaixa(nome, mSalvo.faixa);
       html += `
         <div class="saved-badge">
           <div>📍 <b>Ponto Salvo:</b> Faixa ${mSalvo.faixa} <small>(${mSalvo.data})</small></div>
           <div class="badge-actions">
-            <a href="${linkPonto}" target="_blank" style="color:#4ade80; font-weight:bold; text-decoration:none; font-size:0.9em;">▶️ ${isSingle ? 'Abrir Músicas' : 'Ir para F.' + mSalvo.faixa}</a>
+            <a href="${linkPonto}" onclick="return abrirLinkTelegram('${linkPonto}')" target="_blank" style="color:#4ade80; font-weight:bold; text-decoration:none; font-size:0.9em;">▶️ ${isSingle ? 'Abrir Músicas' : 'Ir para F.' + mSalvo.faixa}</a>
             <button class="del-btn-sm" onclick="removerMarcador('${nome}')">🗑️ Apagar</button>
           </div>
         </div>
@@ -1104,7 +1133,7 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
     }
 
     html += `
-        <a class="vol-btn-link" href="${linkAudio1}" target="_blank">🎧 ABRIR ${nome} NO TELEGRAM</a>
+        <a class="vol-btn-link" href="${linkAudio1}" onclick="return abrirLinkTelegram('${linkAudio1}')" target="_blank">🎧 ABRIR ${nome} NO TELEGRAM</a>
         
         <div class="faixas-marks">
           <span style="font-size:0.75em; color:var(--text-secondary); width:100%;">Marcar onde parou neste volume:</span>
@@ -1178,6 +1207,7 @@ document.getElementById('search').addEventListener('keyup', e => {
 });
 
 // Inicialização
+carregarCloudStorage();
 montarBotoesColecoes();
 </script>
 </body>
