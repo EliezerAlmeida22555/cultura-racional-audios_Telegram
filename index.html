@@ -132,13 +132,30 @@
   .card-title { font-size: 1.05em; font-weight: 700; margin-bottom: 8px; color: var(--tg-theme-text-color, #fff); }
   .card-desc { font-size: 0.9em; color: var(--tg-theme-hint-color, var(--text-secondary)); line-height: 1.4; margin-bottom: 12px; }
 
+  /* Badge de Marcador Salvo na busca */
+  .saved-badge {
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid #22c55e;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 10px;
+    font-size: 0.85em;
+    color: #4ade80;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .badge-actions { display: flex; gap: 6px; align-items: center; }
+
   /* Itens de Volume */
   .vol-item {
     background: var(--tg-theme-bg-color, var(--bg-primary));
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 12px 14px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     display: block;
     text-decoration: none;
     color: var(--tg-theme-text-color, #fff);
@@ -177,11 +194,24 @@
     border-radius: 6px;
     font-size: 0.78em;
     cursor: pointer;
+    transition: all 0.15s ease;
   }
   .mark-chip.active {
-    background: #22c55e;
-    color: #fff;
+    background: #22c55e !important;
+    color: #fff !important;
     font-weight: bold;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+  }
+
+  .del-btn-sm {
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75em;
+    cursor: pointer;
+    font-weight: 600;
   }
 
   .pagination {
@@ -654,7 +684,21 @@ const TOPICOS = {
   "HISTÓRICO - H316": 4971,
   "HISTÓRICO - H317": 4977,
   "HISTÓRICO - H318": 4983,
-  "MUSICAS": 119
+  "MUSICAS": 119,
+  "HISTÓRICO - H319": 4989,
+  "HISTÓRICO - H320": 4995,
+  "HISTÓRICO - H321": 5001,
+  "HISTÓRICO - H322": 5007,
+  "HISTÓRICO - H323": 5012,
+  "HISTÓRICO - H324": 5018,
+  "HISTÓRICO - H325": 5025,
+  "HISTÓRICO - H326": 5031,
+  "HISTÓRICO - H327": 5037,
+  "HISTÓRICO - H328": 5042,
+  "HISTÓRICO - H329": 5048,
+  "HISTÓRICO - H330": 5054,
+  "HISTÓRICO - H331": 5059,
+  "HISTÓRICO - H332": 5067
 };
 
 const EMOJIS = {
@@ -704,148 +748,202 @@ function obterThreadId(volNome) {
   return null;
 }
 
-// Gera o link direto para a Faixas F do Volume no Telegram
+// Gera o link direto para a Faixa F do Volume no Telegram
 function obterLinkFaixa(volNome, faixaNum = 1) {
   const threadId = obterThreadId(volNome);
   if (!threadId) return 'https://t.me/CULTURA_RACIONAL_AUDIOS';
   const f = Math.max(1, parseInt(faixaNum) || 1);
-  // No Telegram, o ID da mensagem do primeiro áudio é threadId + 2 (ou threadId + 1 + f)
   const msgId = parseInt(threadId) + 1 + f;
   return GROUP_LINK + msgId;
 }
 
-// --- MARCADOR "ONDE PAREI?" ---
-function salvarMarcadorSemAlert(volNome, faixaNum) {
-  const markData = {
-    volume: volNome,
-    faixa: parseInt(faixaNum) || 1,
-    data: new Date().toLocaleDateString('pt-BR')
-  };
+// --- GERENCIADOR MULTI-MARCADORES ---
+function obterMarcadores() {
   try {
-    localStorage.setItem('cr_marcador_escuta', JSON.stringify(markData));
-  } catch(e) {}
-
-  try {
-    if (tg && tg.CloudStorage && typeof tg.CloudStorage.setItem === 'function') {
-      tg.CloudStorage.setItem('cr_marcador_escuta', JSON.stringify(markData), function() {});
+    const raw = localStorage.getItem('cr_marcadores_dict');
+    if (raw) return JSON.parse(raw);
+    
+    // Migração do formato antigo de marcador único
+    const antigo = localStorage.getItem('cr_marcador_escuta');
+    if (antigo) {
+      const p = JSON.parse(antigo);
+      if (p && p.volume) {
+        const dict = {};
+        dict[p.volume] = { faixa: parseInt(p.faixa) || 1, data: p.data || new Date().toLocaleDateString('pt-BR') };
+        salvarMarcadoresDict(dict);
+        return dict;
+      }
     }
   } catch(e) {}
+  return {};
+}
 
+function salvarMarcadoresDict(dict) {
+  try {
+    localStorage.setItem('cr_marcadores_dict', JSON.stringify(dict));
+  } catch(e) {}
+  try {
+    if (tg && tg.CloudStorage && typeof tg.CloudStorage.setItem === 'function') {
+      tg.CloudStorage.setItem('cr_marcadores_dict', JSON.stringify(dict), function() {});
+    }
+  } catch(e) {}
   haptic();
 }
 
 function salvarMarcador(volNome, faixaNum) {
-  salvarMarcadorSemAlert(volNome, faixaNum);
-  alert(`📌 Marcado com sucesso!\n\n📖 Volume: ${volNome}\n🎵 Faixa ${faixaNum}`);
-  if (document.getElementById('marcador-card')) {
+  const dict = obterMarcadores();
+  const fNum = parseInt(faixaNum) || 1;
+  dict[volNome] = {
+    faixa: fNum,
+    data: new Date().toLocaleDateString('pt-BR')
+  };
+  salvarMarcadoresDict(dict);
+  alert(`📌 Ponto salvo com sucesso!\n\n📖 Volume: ${volNome}\n🎵 Faixa ${fNum}`);
+  
+  if (document.getElementById('marcador-card-container')) {
+    mostrarOndeParei();
+  } else if (window.currentLista) {
+    renderizarResultados(window.currentLista, window.currentTitulo || 'Resultados', window.currentPagina || 1);
+  }
+}
+
+function removerMarcador(volNome) {
+  haptic();
+  const dict = obterMarcadores();
+  delete dict[volNome];
+  salvarMarcadoresDict(dict);
+  
+  if (document.getElementById('marcador-card-container')) {
+    mostrarOndeParei();
+  } else if (window.currentLista) {
+    renderizarResultados(window.currentLista, window.currentTitulo || 'Resultados', window.currentPagina || 1);
+  }
+}
+
+function limparTodosMarcadores() {
+  haptic();
+  if (confirm('Tem certeza que deseja apagar TODOS os seus pontos de escuta salvos?')) {
+    salvarMarcadoresDict({});
     mostrarOndeParei();
   }
 }
 
-function obterMarcador() {
-  try {
-    const local = localStorage.getItem('cr_marcador_escuta');
-    return local ? JSON.parse(local) : null;
-  } catch(e) {
-    return null;
-  }
-}
-
-function faixaAnterior() {
-  const m = obterMarcador();
+function faixaAnteriorParaVolume(volNome) {
+  const dict = obterMarcadores();
+  const m = dict[volNome];
   if (!m) return;
   const atual = parseInt(m.faixa) || 1;
   if (atual > 1) {
-    salvarMarcadorSemAlert(m.volume, atual - 1);
+    dict[volNome].faixa = atual - 1;
+    salvarMarcadoresDict(dict);
     mostrarOndeParei();
   } else {
     alert('Você já está na Faixa 1 deste volume.');
   }
 }
 
-function avancarFaixa() {
-  const m = obterMarcador();
+function avancarFaixaParaVolume(volNome) {
+  const dict = obterMarcadores();
+  const m = dict[volNome];
   if (!m) return;
   const atual = parseInt(m.faixa) || 1;
-  salvarMarcadorSemAlert(m.volume, atual + 1);
+  dict[volNome].faixa = atual + 1;
+  salvarMarcadoresDict(dict);
   mostrarOndeParei();
 }
 
-function volumeAnterior() {
-  const m = obterMarcador();
-  if (!m) return;
+function volumeAnteriorParaVolume(volNome) {
+  const dict = obterMarcadores();
   const chaves = Object.keys(TOPICOS);
-  const idxAtual = chaves.findIndex(k => norm(k) === norm(m.volume));
-  
+  const idxAtual = chaves.findIndex(k => norm(k) === norm(volNome));
   if (idxAtual > 0) {
     const prevVol = chaves[idxAtual - 1];
-    salvarMarcadorSemAlert(prevVol, 1);
+    const fAnterior = dict[volNome] ? dict[volNome].faixa : 1;
+    dict[prevVol] = { faixa: fAnterior, data: new Date().toLocaleDateString('pt-BR') };
+    salvarMarcadoresDict(dict);
     mostrarOndeParei();
   } else {
     alert('Você já está no primeiro volume disponível.');
   }
 }
 
-function proximoVolume() {
-  const m = obterMarcador();
-  if (!m) return;
+function proximoVolumeParaVolume(volNome) {
+  const dict = obterMarcadores();
   const chaves = Object.keys(TOPICOS);
-  const idxAtual = chaves.findIndex(k => norm(k) === norm(m.volume));
-  
+  const idxAtual = chaves.findIndex(k => norm(k) === norm(volNome));
   if (idxAtual !== -1 && idxAtual + 1 < chaves.length) {
     const proxVol = chaves[idxAtual + 1];
-    salvarMarcadorSemAlert(proxVol, 1);
+    const fAtual = dict[volNome] ? dict[volNome].faixa : 1;
+    dict[proxVol] = { faixa: fAtual, data: new Date().toLocaleDateString('pt-BR') };
+    salvarMarcadoresDict(dict);
     mostrarOndeParei();
   } else {
     alert('Você já está no último volume disponível!');
   }
 }
 
+// --- EXIBIÇÃO DA TELA "ONDE PAREI?" ---
 function mostrarOndeParei() {
   haptic();
-  const m = obterMarcador();
+  const dict = obterMarcadores();
+  const entradas = Object.entries(dict);
   const container = document.getElementById('content-container');
   
-  if (!m) {
+  if (!entradas.length) {
     container.innerHTML = `
-      <div class="card-box" id="marcador-card">
-        <div class="card-title">📍 SEU MARCADOR DE ESCUTA</div>
-        <div class="card-desc">Você ainda não marcou nenhuma faixa.<br><br>Quando estiver ouvindo um volume, clique nos botões <b>📌 Parei na Faixa X</b> para salvar sua posição automaticamente!</div>
+      <div class="card-box" id="marcador-card-container">
+        <div class="card-title">📍 SEUS PONTOS DE ESCUTA</div>
+        <div class="card-desc">Você ainda não marcou nenhum ponto de escuta.<br><br>Quando estiver pesquisando ou ouvindo um volume, clique nos botões <b>📌 Parei F.1</b>, <b>F.2</b>, <b>F.3</b>... para salvar onde parou!</div>
         <button class="voltar-btn" onclick="resetarParaColecoes()">← Voltar às Coleções</button>
       </div>
     `;
     return;
   }
 
-  const volNome = m.volume;
-  const faixaAtual = parseInt(m.faixa) || 1;
-  const linkFaixa = obterLinkFaixa(volNome, faixaAtual);
-
-  container.innerHTML = `
-    <div class="card-box" id="marcador-card">
-      <div class="card-title">📍 SEU PONTO DE ESCUTA SALVO</div>
-      <div class="card-desc">
-        📖 <b>Volume:</b> ${m.volume}<br>
-        🎵 <b>Posição:</b> Faixa ${faixaAtual}<br>
-        📅 <b>Marcado em:</b> ${m.data}
+  let html = `
+    <div id="marcador-card-container">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <button class="voltar-btn" style="margin-bottom:0;" onclick="resetarParaColecoes()">← Voltar às Coleções</button>
+        <button class="del-btn-sm" onclick="limparTodosMarcadores()">🗑️ Apagar Todos (${entradas.length})</button>
       </div>
-      
-      <a class="vol-btn-link" href="${linkFaixa}" target="_blank" style="background:#22c55e;">
-        ▶️ IR PARA FAIXA ${faixaAtual} DE ${m.volume} NO TELEGRAM
-      </a>
-
-      <!-- 4 Controles de Navegação -->
-      <div class="ctrl-grid">
-        <button class="ctrl-btn" onclick="faixaAnterior()">⏪ Faixa Anterior (${Math.max(1, faixaAtual - 1)})</button>
-        <button class="ctrl-btn" onclick="avancarFaixa()">⏩ Próxima Faixa (${faixaAtual + 1})</button>
-        <button class="ctrl-btn" onclick="volumeAnterior()">⏮️ Vol. Anterior</button>
-        <button class="ctrl-btn" onclick="proximoVolume()">⏭️ Próx. Volume</button>
+      <div style="font-size:0.95em; font-weight:bold; margin-bottom:12px; color:var(--text-secondary);">
+        📍 SEUS PONTOS DE ESCUTA SALVOS (${entradas.length} volumes):
       </div>
-
-      <br>
-      <button class="voltar-btn" onclick="resetarParaColecoes()">← Voltar às Coleções</button>
-    </div>
   `;
+
+  // Renderiza cada volume com ponto salvo
+  entradas.forEach(([volNome, info]) => {
+    const faixaAtual = parseInt(info.faixa) || 1;
+    const linkFaixa = obterLinkFaixa(volNome, faixaAtual);
+
+    html += `
+      <div class="card-box" style="margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div class="card-title">📖 ${volNome}</div>
+          <button class="del-btn-sm" onclick="removerMarcador('${volNome}')">🗑️ Remover</button>
+        </div>
+        <div class="card-desc">
+          🎵 <b>Ponto Salvo:</b> Faixa ${faixaAtual}<br>
+          📅 <b>Marcado em:</b> ${info.data}
+        </div>
+        
+        <a class="vol-btn-link" href="${linkFaixa}" target="_blank" style="background:#22c55e;">
+          ▶️ IR PARA FAIXA ${faixaAtual} DE ${volNome} NO TELEGRAM
+        </a>
+
+        <!-- Controles individuais de navegação para este volume -->
+        <div class="ctrl-grid">
+          <button class="ctrl-btn" onclick="faixaAnteriorParaVolume('${volNome}')">⏪ Faixa Anterior (${Math.max(1, faixaAtual - 1)})</button>
+          <button class="ctrl-btn" onclick="avancarFaixaParaVolume('${volNome}')">⏩ Próxima Faixa (${faixaAtual + 1})</button>
+          <button class="ctrl-btn" onclick="volumeAnteriorParaVolume('${volNome}')">⏮️ Vol. Anterior</button>
+          <button class="ctrl-btn" onclick="proximoVolumeParaVolume('${volNome}')">⏭️ Próx. Volume</button>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  container.innerHTML = html;
 }
 
 // --- ÁUDIO / VOLUME DO DIA ---
@@ -917,6 +1015,10 @@ function focarBusca() {
 
 // --- EXIBIÇÃO DE RESULTADOS & PAGINAÇÃO EM LOTES ---
 function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
+  window.currentLista = lista;
+  window.currentTitulo = titulo;
+  window.currentPagina = pagina;
+
   const container = document.getElementById('content-container');
   if (!lista.length) {
     container.innerHTML = `
@@ -930,6 +1032,7 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
     return;
   }
 
+  const dictMarcadores = obterMarcadores();
   const total = lista.length;
   const totalPaginas = Math.ceil(total / loteTam);
   const inicio = (pagina - 1) * loteTam;
@@ -940,18 +1043,39 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
   html += `<div style="font-size:0.9em; font-weight:bold; margin-bottom:12px; color:var(--text-secondary);">${titulo} (${total} volumes):</div>`;
 
   itensPagina.forEach(([nome, id]) => {
-    // Link direto para a Faixa 1 do volume!
     const linkAudio1 = obterLinkFaixa(nome, 1);
+    const mSalvo = dictMarcadores[nome];
+
     html += `
       <div class="vol-item">
         <div class="vol-header">
           <span class="vol-title">📖 ${nome}</span>
         </div>
+    `;
+
+    // Se houver um ponto salvo para este volume, exibe o Badge de Destaque
+    if (mSalvo) {
+      const linkPonto = obterLinkFaixa(nome, mSalvo.faixa);
+      html += `
+        <div class="saved-badge">
+          <div>📍 <b>Ponto Salvo:</b> Faixa ${mSalvo.faixa} <small>(${mSalvo.data})</small></div>
+          <div class="badge-actions">
+            <a href="${linkPonto}" target="_blank" style="color:#4ade80; font-weight:bold; text-decoration:none; font-size:0.9em;">▶️ Ir para F.${mSalvo.faixa}</a>
+            <button class="del-btn-sm" onclick="removerMarcador('${nome}')">🗑️ Apagar</button>
+          </div>
+        </div>
+      `;
+    }
+
+    html += `
         <a class="vol-btn-link" href="${linkAudio1}" target="_blank">🎧 ABRIR ${nome} NO TELEGRAM</a>
         
         <div class="faixas-marks">
           <span style="font-size:0.75em; color:var(--text-secondary); width:100%;">Marcar onde parou neste volume:</span>
-          ${[1,2,3,4,5].map(f => `<button class="mark-chip" onclick="salvarMarcador('${nome}', ${f})">📌 Parei F.${f}</button>`).join('')}
+          ${[1,2,3,4,5].map(f => {
+            const isSelected = mSalvo && parseInt(mSalvo.faixa) === f;
+            return `<button class="mark-chip ${isSelected ? 'active' : ''}" onclick="salvarMarcador('${nome}', ${f})">📌 Parei F.${f}</button>`;
+          }).join('')}
         </div>
       </div>
     `;
@@ -970,7 +1094,6 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
   }
 
   container.innerHTML = html;
-  window.currentLista = lista;
 }
 
 function mudarPagina(titulo, novaPagina) {
