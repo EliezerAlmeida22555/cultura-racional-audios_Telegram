@@ -214,23 +214,28 @@
     border: none;
   }
 
-  .action-row {
-    display: flex;
+  .ctrl-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
     margin-top: 12px;
   }
-  .action-btn {
-    flex: 1;
+  .ctrl-btn {
     background: var(--bg-input);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
-    padding: 10px;
+    padding: 10px 6px;
     border-radius: 8px;
     font-size: 0.82em;
     font-weight: 600;
     cursor: pointer;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
   }
+  .ctrl-btn:active { transform: scale(0.96); }
 
   .empty { text-align: center; color: var(--tg-theme-hint-color, var(--text-secondary)); padding: 24px 0; font-size: 0.9em; }
 </style>
@@ -688,7 +693,7 @@ function haptic() {
   } catch(e) {}
 }
 
-// Busca inteligente do ID do tópico no dicionário TOPICOS
+// Busca o ID do tópico no dicionário TOPICOS
 function obterThreadId(volNome) {
   if (!volNome) return null;
   if (TOPICOS[volNome]) return TOPICOS[volNome];
@@ -697,6 +702,16 @@ function obterThreadId(volNome) {
     if (norm(k) === n) return v;
   }
   return null;
+}
+
+// Gera o link direto para a Faixas F do Volume no Telegram
+function obterLinkFaixa(volNome, faixaNum = 1) {
+  const threadId = obterThreadId(volNome);
+  if (!threadId) return 'https://t.me/CULTURA_RACIONAL_AUDIOS';
+  const f = Math.max(1, parseInt(faixaNum) || 1);
+  // No Telegram, o ID da mensagem do primeiro áudio é threadId + 2 (ou threadId + 1 + f)
+  const msgId = parseInt(threadId) + 1 + f;
+  return GROUP_LINK + msgId;
 }
 
 // --- MARCADOR "ONDE PAREI?" ---
@@ -736,23 +751,44 @@ function obterMarcador() {
   }
 }
 
+function faixaAnterior() {
+  const m = obterMarcador();
+  if (!m) return;
+  const atual = parseInt(m.faixa) || 1;
+  if (atual > 1) {
+    salvarMarcadorSemAlert(m.volume, atual - 1);
+    mostrarOndeParei();
+  } else {
+    alert('Você já está na Faixa 1 deste volume.');
+  }
+}
+
 function avancarFaixa() {
   const m = obterMarcador();
-  if (!m) {
-    alert('Nenhum volume marcado ainda.');
-    return;
-  }
-  const novaFaixa = (parseInt(m.faixa) || 1) + 1;
-  salvarMarcadorSemAlert(m.volume, novaFaixa);
+  if (!m) return;
+  const atual = parseInt(m.faixa) || 1;
+  salvarMarcadorSemAlert(m.volume, atual + 1);
   mostrarOndeParei();
+}
+
+function volumeAnterior() {
+  const m = obterMarcador();
+  if (!m) return;
+  const chaves = Object.keys(TOPICOS);
+  const idxAtual = chaves.findIndex(k => norm(k) === norm(m.volume));
+  
+  if (idxAtual > 0) {
+    const prevVol = chaves[idxAtual - 1];
+    salvarMarcadorSemAlert(prevVol, 1);
+    mostrarOndeParei();
+  } else {
+    alert('Você já está no primeiro volume disponível.');
+  }
 }
 
 function proximoVolume() {
   const m = obterMarcador();
-  if (!m) {
-    alert('Nenhum volume marcado ainda.');
-    return;
-  }
+  if (!m) return;
   const chaves = Object.keys(TOPICOS);
   const idxAtual = chaves.findIndex(k => norm(k) === norm(m.volume));
   
@@ -761,19 +797,6 @@ function proximoVolume() {
     salvarMarcadorSemAlert(proxVol, 1);
     mostrarOndeParei();
   } else {
-    // Tenta avançar por código numérico de coleção (ex: AMARELÕES - A01 -> A02)
-    const mCod = norm(m.volume).match(/^([a-z]+)\s*-\s*([a-z]*)(\d+)$/);
-    if (mCod) {
-      const colNome = mCod[1];
-      const numAtual = parseInt(mCod[3]);
-      const proxNum = numAtual + 1;
-      const proxChave = chaves.find(k => norm(k).includes(colNome) && extrairNum(k) === proxNum);
-      if (proxChave) {
-        salvarMarcadorSemAlert(proxChave, 1);
-        mostrarOndeParei();
-        return;
-      }
-    }
     alert('Você já está no último volume disponível!');
   }
 }
@@ -795,26 +818,28 @@ function mostrarOndeParei() {
   }
 
   const volNome = m.volume;
-  const threadId = obterThreadId(volNome);
-  const link = threadId ? (GROUP_LINK + threadId) : 'https://t.me/CULTURA_RACIONAL_AUDIOS';
-  const proxFaixaNum = (parseInt(m.faixa) || 1) + 1;
+  const faixaAtual = parseInt(m.faixa) || 1;
+  const linkFaixa = obterLinkFaixa(volNome, faixaAtual);
 
   container.innerHTML = `
     <div class="card-box" id="marcador-card">
       <div class="card-title">📍 SEU PONTO DE ESCUTA SALVO</div>
       <div class="card-desc">
         📖 <b>Volume:</b> ${m.volume}<br>
-        🎵 <b>Posição:</b> Faixa ${m.faixa}<br>
+        🎵 <b>Posição:</b> Faixa ${faixaAtual}<br>
         📅 <b>Marcado em:</b> ${m.data}
       </div>
       
-      <a class="vol-btn-link" href="${link}" target="_blank" style="background:#22c55e;">
-        ▶️ IR PARA ${m.volume} (FAIXA ${m.faixa}) NO TELEGRAM
+      <a class="vol-btn-link" href="${linkFaixa}" target="_blank" style="background:#22c55e;">
+        ▶️ IR PARA FAIXA ${faixaAtual} DE ${m.volume} NO TELEGRAM
       </a>
 
-      <div class="action-row">
-        <button class="action-btn" onclick="avancarFaixa()">⏩ Próxima Faixa (${proxFaixaNum})</button>
-        <button class="action-btn" onclick="proximoVolume()">⏭️ Próximo Volume</button>
+      <!-- 4 Controles de Navegação -->
+      <div class="ctrl-grid">
+        <button class="ctrl-btn" onclick="faixaAnterior()">⏪ Faixa Anterior (${Math.max(1, faixaAtual - 1)})</button>
+        <button class="ctrl-btn" onclick="avancarFaixa()">⏩ Próxima Faixa (${faixaAtual + 1})</button>
+        <button class="ctrl-btn" onclick="volumeAnterior()">⏮️ Vol. Anterior</button>
+        <button class="ctrl-btn" onclick="proximoVolume()">⏭️ Próx. Volume</button>
       </div>
 
       <br>
@@ -830,8 +855,7 @@ function sortearAudioDia() {
   if (!chaves.length) return;
   
   const sorteado = chaves[Math.floor(Math.random() * chaves.length)];
-  const threadId = obterThreadId(sorteado);
-  const link = threadId ? (GROUP_LINK + threadId) : 'https://t.me/CULTURA_RACIONAL_AUDIOS';
+  const linkAudio1 = obterLinkFaixa(sorteado, 1);
 
   const container = document.getElementById('content-container');
   container.innerHTML = `
@@ -841,7 +865,7 @@ function sortearAudioDia() {
         📖 <b>Volume Sorteado:</b> ${sorteado}<br><br>
         <i>"Leia a Cultura Racional para obter o conhecimento do seu verdadeiro estado natural de Racional."</i>
       </div>
-      <a class="vol-btn-link" href="${link}" target="_blank">🎧 OUVIR ${sorteado} NO TELEGRAM</a>
+      <a class="vol-btn-link" href="${linkAudio1}" target="_blank">🎧 OUVIR ${sorteado} NO TELEGRAM</a>
       <br><br>
       <div style="display:flex; gap:8px;">
         <button class="voltar-btn" onclick="sortearAudioDia()">🎲 Sortear Outro</button>
@@ -916,13 +940,14 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
   html += `<div style="font-size:0.9em; font-weight:bold; margin-bottom:12px; color:var(--text-secondary);">${titulo} (${total} volumes):</div>`;
 
   itensPagina.forEach(([nome, id]) => {
-    const link = GROUP_LINK + id;
+    // Link direto para a Faixa 1 do volume!
+    const linkAudio1 = obterLinkFaixa(nome, 1);
     html += `
       <div class="vol-item">
         <div class="vol-header">
           <span class="vol-title">📖 ${nome}</span>
         </div>
-        <a class="vol-btn-link" href="${link}" target="_blank">🎧 ABRIR ${nome} NO TELEGRAM</a>
+        <a class="vol-btn-link" href="${linkAudio1}" target="_blank">🎧 ABRIR ${nome} NO TELEGRAM</a>
         
         <div class="faixas-marks">
           <span style="font-size:0.75em; color:var(--text-secondary); width:100%;">Marcar onde parou neste volume:</span>
