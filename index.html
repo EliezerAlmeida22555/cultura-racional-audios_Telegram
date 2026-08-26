@@ -809,9 +809,16 @@ function haptic() {
   } catch(e) {}
 }
 
-// Método nativo do Telegram para abrir links nativamente e fechar o WebApp Mini App
+// Método para abrir links do Telegram MANTENDO O MINI APP SEMPRE ABERTO na tela
 function abrirLinkTelegram(url) {
   haptic();
+  try {
+    // tg.openLink abre o link mantendo o WebApp ativo sem fechar o Mini App!
+    if (tg && typeof tg.openLink === 'function') {
+      tg.openLink(url);
+      return false;
+    }
+  } catch(e) {}
   try {
     if (tg && typeof tg.openTelegramLink === 'function') {
       tg.openTelegramLink(url);
