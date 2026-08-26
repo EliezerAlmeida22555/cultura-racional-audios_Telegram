@@ -6557,13 +6557,20 @@ function haptic() {
   } catch(e) {}
 }
 
-// Método para abrir links do Telegram MANTENDO O MINI APP SEMPRE ABERTO na tela
+// Método para abrir links do Telegram usando a API nativa do WebApp
 function abrirLinkTelegram(url) {
   haptic();
   try {
-    if (tg && typeof tg.openLink === 'function') {
-      tg.openLink(url);
-      return false;
+    if (url && url.includes('t.me/')) {
+      if (tg && typeof tg.openTelegramLink === 'function') {
+        tg.openTelegramLink(url);
+        return false;
+      }
+    } else {
+      if (tg && typeof tg.openLink === 'function') {
+        tg.openLink(url);
+        return false;
+      }
     }
   } catch(e) {}
   try {
