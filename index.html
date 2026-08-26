@@ -395,7 +395,7 @@
   <span class="header-icon">🎧</span>
   <h1>CULTURA RACIONAL</h1>
   <p class="subtitle">Navegador & Marcador de Áudios</p>
-  <span style="font-size:0.75em; background:rgba(56, 189, 248, 0.2); color:#38bdf8; border:1px solid #38bdf8; padding:2px 8px; border-radius:10px; margin-top:6px; display:inline-block;">⚡ v4.0 — DIRETO NO TELEGRAM DESKTOP/APP NATIVO</span>
+  <span style="font-size:0.75em; background:rgba(56, 189, 248, 0.2); color:#38bdf8; border:1px solid #38bdf8; padding:2px 8px; border-radius:10px; margin-top:6px; display:inline-block;">⚡ v5.0 — DESKTOP DIRETO SEM WEB</span>
 </div>
 
 <!-- 4 Botões Principais de Navegação -->
@@ -6651,14 +6651,14 @@ function obterThreadId(volNome) {
   return null;
 }
 
-// Gera o link direto para a Faixa F do Volume no Telegram
+// Gera o link nativo direto para o Telegram Desktop/App (protocolo tg://)
 function obterLinkFaixa(volNome, faixaNum = 1) {
   const threadId = obterThreadId(volNome);
-  if (!threadId) return 'https://t.me/CULTURA_RACIONAL_AUDIOS';
+  if (!threadId) return 'tg://resolve?domain=CULTURA_RACIONAL_AUDIOS';
   
   const f = Math.max(1, parseInt(faixaNum) || 1);
   const msgId = parseInt(threadId) + 1 + f;
-  return GROUP_LINK + msgId;
+  return 'tg://privatepost?channel=4415417039&post=' + msgId;
 }
 
 const expandedVolumesSet = new Set();
@@ -6925,9 +6925,9 @@ function renderizarOndePareiView() {
           📅 <b>Marcado em:</b> ${info.data}
         </div>
         
-        <a class="vol-btn-link" href="${linkFaixa}" onclick="return abrirLinkTelegram('${linkFaixa}')" target="_blank" style="background:#22c55e;">
+        <button type="button" class="vol-btn-link" onclick="abrirLinkTelegram('${linkFaixa}')" style="background:#22c55e;">
           ▶️ IR PARA ${isSingle ? volNome : 'FAIXA ' + faixaAtual + ' DE ' + volNome} NO TELEGRAM
-        </a>
+        </button>
 
         <!-- Controles rápidos de faixa e volume -->
         <div class="ctrl-grid">
@@ -7005,7 +7005,7 @@ function sortearAudioDia() {
         📖 <b>Volume Sorteado:</b> ${sorteado}<br><br>
         <i>"Leia a Cultura Racional para obter o conhecimento do seu verdadeiro estado natural de Racional."</i>
       </div>
-      <a class="vol-btn-link" href="${linkAudio1}" onclick="return abrirLinkTelegram('${linkAudio1}')" target="_blank">🎧 OUVIR ${sorteado} NO TELEGRAM</a>
+      <button type="button" class="vol-btn-link" onclick="abrirLinkTelegram('${linkAudio1}')">🎧 OUVIR ${sorteado} NO TELEGRAM</button>
       <br><br>
       <div style="display:flex; gap:8px;">
         <button class="voltar-btn" onclick="sortearAudioDia()">🎲 Sortear Outro</button>
@@ -7105,7 +7105,7 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
         <div class="saved-badge">
           <div>📍 <b>Ponto Salvo:</b> Faixa ${mSalvo.faixa} <small>(${mSalvo.data})</small></div>
           <div class="badge-actions">
-            <a href="${linkPonto}" onclick="return abrirLinkTelegram('${linkPonto}')" target="_blank" style="color:#4ade80; font-weight:bold; text-decoration:none; font-size:0.9em;">▶️ ${isSingle ? 'Abrir Músicas' : 'Ir para F.' + mSalvo.faixa}</a>
+            <button type="button" onclick="abrirLinkTelegram('${linkPonto}')" style="background:transparent; border:none; color:#4ade80; font-weight:bold; font-size:0.9em; cursor:pointer;">▶️ ${isSingle ? 'Abrir Músicas' : 'Ir para F.' + mSalvo.faixa}</button>
             <button class="del-btn-sm" onclick="removerMarcador('${eNome}')">🗑️ Apagar</button>
           </div>
         </div>
@@ -7125,7 +7125,7 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
     const btnText = isExpanded ? '🎵 Ocultar Lista de Faixas 🔼' : `🎵 Ver Lista de Faixas (${countF} faixas) 🔽`;
 
     html += `
-        <a class="vol-btn-link" href="${linkAudio1}" onclick="return abrirLinkTelegram('${linkAudio1}')" target="_blank">🎧 ABRIR ${nome} NO TELEGRAM</a>
+        <button type="button" class="vol-btn-link" onclick="abrirLinkTelegram('${linkAudio1}')">🎧 ABRIR ${nome} NO TELEGRAM</button>
         
         <div class="faixas-marks">
           <span style="font-size:0.75em; color:var(--text-secondary); width:100%;">Marcar onde parou neste volume:</span>
