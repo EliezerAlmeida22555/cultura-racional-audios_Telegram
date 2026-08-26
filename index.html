@@ -879,21 +879,15 @@ function obterThreadId(volNome) {
   return null;
 }
 
-// Gera o link direto para a Faixa F do Volume no Telegram (direciona para a mensagem do áudio no topo!)
+// Gera o link direto para a Faixa F do Volume no Telegram (direciona dinamicamente para a mensagem do áudio no topo!)
 function obterLinkFaixa(volNome, faixaNum = 1) {
   const threadId = obterThreadId(volNome);
   if (!threadId) return 'https://t.me/CULTURA_RACIONAL_AUDIOS';
   
   const f = Math.max(1, parseInt(faixaNum) || 1);
   
-  // Tratamento especial para a coleção MUSICAS (Thread 119)
-  if (norm(volNome) === 'musicas' || String(threadId) === '119') {
-    const msgId = 5201 + f;
-    return GROUP_LINK + msgId;
-  }
-  
-  // Para os demais tópicos de volumes (ex: OBRA - O15)
-  // No Telegram, a Faixa F é o message_id (threadId + 1 + f)
+  // Para todos os tópicos e volumes (inclusive a nova coleção MUSICAS)
+  // No Telegram, a Faixa F é o message_id exato do áudio (threadId + 1 + f)
   const msgId = parseInt(threadId) + 1 + f;
   return GROUP_LINK + msgId;
 }
