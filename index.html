@@ -395,7 +395,7 @@
   <span class="header-icon">🎧</span>
   <h1>CULTURA RACIONAL</h1>
   <p class="subtitle">Navegador & Marcador de Áudios</p>
-  <span style="font-size:0.75em; background:rgba(56, 189, 248, 0.2); color:#38bdf8; border:1px solid #38bdf8; padding:2px 8px; border-radius:10px; margin-top:6px; display:inline-block;">⚡ v5.0 — DESKTOP DIRETO SEM WEB</span>
+  <span style="font-size:0.75em; background:rgba(56, 189, 248, 0.2); color:#38bdf8; border:1px solid #38bdf8; padding:2px 8px; border-radius:10px; margin-top:6px; display:inline-block;">⚡ v6.0 — CORREÇÃO FAIXA EXATA & INTEGRAÇÃO NATIVA</span>
 </div>
 
 <!-- 4 Botões Principais de Navegação -->
@@ -6615,31 +6615,25 @@ function abrirLinkTelegram(url) {
   haptic();
   if (!url) return false;
 
-  let tgProtocolUrl = null;
-  const m = String(url).match(/t\.me\/c\/(\d+)\/(\d+)/);
-  if (m) {
-    tgProtocolUrl = `tg://privatepost?channel=${m[1]}&post=${m[2]}`;
+  let tgProtocolUrl = url;
+  if (!url.startsWith('tg://')) {
+    const m = String(url).match(/t\.me\/c\/(\d+)\/(\d+)/);
+    if (m) {
+      tgProtocolUrl = `tg://privatepost?channel=${m[1]}&post=${m[2]}`;
+    }
   }
 
-  // 1. Tenta usar o SDK oficial do Telegram WebApp (abre nativamente no app/desktop)
+  // 1. Tenta usar o SDK oficial do Telegram WebApp
   try {
     if (tg && typeof tg.openTelegramLink === 'function') {
-      tg.openTelegramLink(url);
+      tg.openTelegramLink(tgProtocolUrl);
       return false;
     }
   } catch(e) {}
 
   // 2. Tenta acionar o protocolo nativo tg:// do Telegram Desktop no computador
-  if (tgProtocolUrl) {
-    try {
-      window.location.href = tgProtocolUrl;
-      return false;
-    } catch(e) {}
-  }
-
-  // 3. Fallback de redirecionamento direto para o app nativo
   try {
-    window.location.href = url;
+    window.location.href = tgProtocolUrl;
     return false;
   } catch(e) {}
 
@@ -6661,13 +6655,13 @@ function obterThreadId(volNome) {
   return null;
 }
 
-// Gera o link nativo direto para o Telegram Desktop/App (protocolo tg://)
+// Gera o link nativo direto para a Faixa F exata do Volume no Telegram (sem pular faixa)
 function obterLinkFaixa(volNome, faixaNum = 1) {
   const threadId = obterThreadId(volNome);
   if (!threadId) return 'tg://resolve?domain=CULTURA_RACIONAL_AUDIOS';
   
   const f = Math.max(1, parseInt(faixaNum) || 1);
-  const msgId = parseInt(threadId) + 1 + f;
+  const msgId = parseInt(threadId) + f;
   return 'tg://privatepost?channel=4415417039&post=' + msgId;
 }
 
