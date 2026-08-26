@@ -6839,6 +6839,10 @@ function renderizarOndePareiView() {
     const isSingle = isSingleTopicCollection(volNome);
     const cleanId = norm(volNome).replace(/[^a-z0-9]/g, '');
 
+    const listaF = obterListaFaixas(volNome);
+    const countF = listaF ? listaF.length : 15;
+    const eVol = esc(volNome);
+
     const isExpanded = expandedVolumesSet.has('card-' + cleanId);
     const displayStyle = isExpanded ? 'display:flex;' : 'display:none;';
     const btnText = isExpanded ? '🎵 Ocultar Lista de Faixas 🔼' : `🎵 Ver Lista de Faixas (${countF} faixas) 🔽`;
