@@ -395,7 +395,7 @@
   <span class="header-icon">🎧</span>
   <h1>CULTURA RACIONAL</h1>
   <p class="subtitle">Navegador & Marcador de Áudios</p>
-  <span style="font-size:0.75em; background:rgba(56, 189, 248, 0.2); color:#38bdf8; border:1px solid #38bdf8; padding:2px 8px; border-radius:10px; margin-top:6px; display:inline-block;">⚡ v2.7 — SUPORTE NATIVO ULTRA-RÁPIDO</span>
+  <span style="font-size:0.75em; background:rgba(56, 189, 248, 0.2); color:#38bdf8; border:1px solid #38bdf8; padding:2px 8px; border-radius:10px; margin-top:6px; display:inline-block;">⚡ v2.8 — AUTO-FECHAR MINI APP</span>
 </div>
 
 <!-- 4 Botões Principais de Navegação -->
@@ -4064,7 +4064,8 @@ const FAIXAS = {
     "04. 4a-Como é a chegada de todos,no Mundo Racional,...6a e 7a mensagens"
   ],
   "HISTÓRICO - H440": [
-    "01. UNIVERSO EM DESENCANTO"
+    "01. UNIVERSO EM DESENCANTO",
+    "02. COMPLETO Int 1a-Quem és tu, que a ilusão é tanta....."
   ],
   "HISTÓRICO - H065": [
     "01. Int e 1a-O pensador foi feito...1a e 2a mensagens",
@@ -6579,7 +6580,7 @@ function haptic() {
   } catch(e) {}
 }
 
-// Método universal de abertura de links no Telegram (com suporte nativo a tg://)
+// Método universal de abertura de links no Telegram (com fecho automático do WebApp)
 function abrirLinkTelegram(url) {
   haptic();
   if (!url) return false;
@@ -6593,6 +6594,7 @@ function abrirLinkTelegram(url) {
   try {
     if (tg && typeof tg.openTelegramLink === 'function') {
       tg.openTelegramLink(url);
+      try { if (tg && typeof tg.close === 'function') tg.close(); } catch(e) {}
       return false;
     }
   } catch(e) {}
@@ -6600,6 +6602,7 @@ function abrirLinkTelegram(url) {
   try {
     if (tg && typeof tg.openLink === 'function') {
       tg.openLink(url);
+      try { if (tg && typeof tg.close === 'function') tg.close(); } catch(e) {}
       return false;
     }
   } catch(e) {}
@@ -6607,16 +6610,19 @@ function abrirLinkTelegram(url) {
   if (tgProtocolUrl) {
     try {
       window.location.href = tgProtocolUrl;
+      try { if (tg && typeof tg.close === 'function') tg.close(); } catch(e) {}
       return false;
     } catch(e) {}
   }
 
   try {
     window.location.href = url;
+    try { if (tg && typeof tg.close === 'function') tg.close(); } catch(e) {}
     return false;
   } catch(e) {}
 
   window.open(url, '_blank');
+  try { if (tg && typeof tg.close === 'function') tg.close(); } catch(e) {}
   return false;
 }
 
