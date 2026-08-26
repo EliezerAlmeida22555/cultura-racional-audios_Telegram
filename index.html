@@ -395,7 +395,7 @@
   <span class="header-icon">🎧</span>
   <h1>CULTURA RACIONAL</h1>
   <p class="subtitle">Navegador & Marcador de Áudios</p>
-  <span style="font-size:0.75em; background:rgba(56, 189, 248, 0.2); color:#38bdf8; border:1px solid #38bdf8; padding:2px 8px; border-radius:10px; margin-top:6px; display:inline-block;">⚡ v2.5 — Lista & Player Ativo</span>
+  <span style="font-size:0.75em; background:rgba(56, 189, 248, 0.2); color:#38bdf8; border:1px solid #38bdf8; padding:2px 8px; border-radius:10px; margin-top:6px; display:inline-block;">⚡ v2.6 — NAVEGAÇÃO DIRETA TELEGRAM</span>
 </div>
 
 <!-- 4 Botões Principais de Navegação -->
@@ -4024,7 +4024,8 @@ const FAIXAS = {
     "05. 4a e 5a 4a-Estamos na Fase Racional.....7a mensagem 5a-Com a desmaterialização da energia.....8a mensagem"
   ],
   "HISTÓRICO - H420": [
-    "01. UNIVERSO EM DESENCANTO"
+    "01. UNIVERSO EM DESENCANTO",
+    "02. COMPLETO Int 1a-A matéria é um ser simbólico....."
   ],
   "HISTÓRICO - H335": [
     "01. UNIVERSO EM DESENCANTO",
@@ -6559,28 +6560,30 @@ function haptic() {
   } catch(e) {}
 }
 
-// Método para abrir links do Telegram usando a API nativa do WebApp
+// Método universal de abertura de links no Telegram (com triplo fallback)
 function abrirLinkTelegram(url) {
   haptic();
-  try {
-    if (url && url.includes('t.me/')) {
-      if (tg && typeof tg.openTelegramLink === 'function') {
-        tg.openTelegramLink(url);
-        return false;
-      }
-    } else {
-      if (tg && typeof tg.openLink === 'function') {
-        tg.openLink(url);
-        return false;
-      }
-    }
-  } catch(e) {}
+  if (!url) return false;
+
   try {
     if (tg && typeof tg.openTelegramLink === 'function') {
       tg.openTelegramLink(url);
       return false;
     }
   } catch(e) {}
+
+  try {
+    if (tg && typeof tg.openLink === 'function') {
+      tg.openLink(url);
+      return false;
+    }
+  } catch(e) {}
+
+  try {
+    window.location.href = url;
+    return false;
+  } catch(e) {}
+
   window.open(url, '_blank');
   return false;
 }
