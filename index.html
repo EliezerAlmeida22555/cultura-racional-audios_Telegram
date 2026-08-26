@@ -395,7 +395,7 @@
   <span class="header-icon">🎧</span>
   <h1>CULTURA RACIONAL</h1>
   <p class="subtitle">Navegador & Marcador de Áudios</p>
-  <span style="font-size:0.75em; background:rgba(56, 189, 248, 0.2); color:#38bdf8; border:1px solid #38bdf8; padding:2px 8px; border-radius:10px; margin-top:6px; display:inline-block;">⚡ v3.0 — OPENLINK MANTÉM TELA ABERTA</span>
+  <span style="font-size:0.75em; background:rgba(56, 189, 248, 0.2); color:#38bdf8; border:1px solid #38bdf8; padding:2px 8px; border-radius:10px; margin-top:6px; display:inline-block;">⚡ v4.0 — DIRETO NO TELEGRAM DESKTOP/APP NATIVO</span>
 </div>
 
 <!-- 4 Botões Principais de Navegação -->
@@ -945,7 +945,8 @@ const TOPICOS = {
   "HISTÓRICO - H456": 5738,
   "HISTÓRICO - H457": 5741,
   "HISTÓRICO - H458": 5744,
-  "HISTÓRICO - H459": 5747
+  "HISTÓRICO - H459": 5747,
+  "HISTÓRICO - H460": 5750
 };
 const FAIXAS = {
   "HISTÓRICO - H047": [
@@ -6599,20 +6600,18 @@ function haptic() {
   } catch(e) {}
 }
 
-// Método universal de abertura de links no Telegram (prioriza tg.openLink para NÃO fechar/minimizar o WebApp)
+// Método para abrir diretamente no TELEGRAM DESKTOP ou APP NATIVO (sem abrir o Telegram Web!)
 function abrirLinkTelegram(url) {
   haptic();
   if (!url) return false;
 
-  // 1. tg.openLink abre o link sem minimizar/fechar o Mini App do Telegram
-  try {
-    if (tg && typeof tg.openLink === 'function') {
-      tg.openLink(url);
-      return false;
-    }
-  } catch(e) {}
+  let tgProtocolUrl = null;
+  const m = String(url).match(/t\.me\/c\/(\d+)\/(\d+)/);
+  if (m) {
+    tgProtocolUrl = `tg://privatepost?channel=${m[1]}&post=${m[2]}`;
+  }
 
-  // 2. Fallback tg.openTelegramLink
+  // 1. Tenta usar o SDK oficial do Telegram WebApp (abre nativamente no app/desktop)
   try {
     if (tg && typeof tg.openTelegramLink === 'function') {
       tg.openTelegramLink(url);
@@ -6620,12 +6619,20 @@ function abrirLinkTelegram(url) {
     }
   } catch(e) {}
 
+  // 2. Tenta acionar o protocolo nativo tg:// do Telegram Desktop no computador
+  if (tgProtocolUrl) {
+    try {
+      window.location.href = tgProtocolUrl;
+      return false;
+    } catch(e) {}
+  }
+
+  // 3. Fallback de redirecionamento direto para o app nativo
   try {
     window.location.href = url;
     return false;
   } catch(e) {}
 
-  window.open(url, '_blank');
   return false;
 }
 
