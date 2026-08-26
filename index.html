@@ -395,7 +395,7 @@
   <span class="header-icon">🎧</span>
   <h1>CULTURA RACIONAL</h1>
   <p class="subtitle">Navegador & Marcador de Áudios</p>
-  <span style="font-size:0.75em; background:rgba(56, 189, 248, 0.2); color:#38bdf8; border:1px solid #38bdf8; padding:2px 8px; border-radius:10px; margin-top:6px; display:inline-block;">⚡ v2.6 — NAVEGAÇÃO DIRETA TELEGRAM</span>
+  <span style="font-size:0.75em; background:rgba(56, 189, 248, 0.2); color:#38bdf8; border:1px solid #38bdf8; padding:2px 8px; border-radius:10px; margin-top:6px; display:inline-block;">⚡ v2.7 — SUPORTE NATIVO ULTRA-RÁPIDO</span>
 </div>
 
 <!-- 4 Botões Principais de Navegação -->
@@ -2377,7 +2377,8 @@ const FAIXAS = {
     "05. 5a-O certo dos certos tinha que chegar um dia...10a e 11a mensagens"
   ],
   "HISTÓRICO - H431": [
-    "01. UNIVERSO EM DESENCANTO"
+    "01. UNIVERSO EM DESENCANTO",
+    "02. COMPLETO Int 1a-Por viverem artificialmente...."
   ],
   "HISTÓRICO - H106": [
     "01. Int 1a-Os efeitos da levitação....1a e 2a mensagens",
@@ -6570,10 +6571,16 @@ function haptic() {
   } catch(e) {}
 }
 
-// Método universal de abertura de links no Telegram (com triplo fallback)
+// Método universal de abertura de links no Telegram (com suporte nativo a tg://)
 function abrirLinkTelegram(url) {
   haptic();
   if (!url) return false;
+
+  let tgProtocolUrl = null;
+  const m = String(url).match(/t\.me\/c\/(\d+)\/(\d+)/);
+  if (m) {
+    tgProtocolUrl = `tg://privatepost?channel=${m[1]}&post=${m[2]}`;
+  }
 
   try {
     if (tg && typeof tg.openTelegramLink === 'function') {
@@ -6588,6 +6595,13 @@ function abrirLinkTelegram(url) {
       return false;
     }
   } catch(e) {}
+
+  if (tgProtocolUrl) {
+    try {
+      window.location.href = tgProtocolUrl;
+      return false;
+    } catch(e) {}
+  }
 
   try {
     window.location.href = url;
@@ -6623,6 +6637,8 @@ function obterLinkFaixa(volNome, faixaNum = 1) {
   return GROUP_LINK + msgId;
 }
 
+const expandedVolumesSet = new Set();
+
 function toggleFaixasVolume(cleanId, count) {
   haptic();
   const el = document.getElementById('tracks-list-' + cleanId);
@@ -6631,9 +6647,11 @@ function toggleFaixasVolume(cleanId, count) {
   const labelCount = count ? count + ' faixas' : 'faixas';
   if (el.style.display === 'none' || !el.style.display) {
     el.style.display = 'flex';
+    expandedVolumesSet.add(cleanId);
     if (btn) btn.innerHTML = '🎵 Ocultar Lista de Faixas 🔼';
   } else {
     el.style.display = 'none';
+    expandedVolumesSet.delete(cleanId);
     if (btn) btn.innerHTML = `🎵 Ver Lista de Faixas (${labelCount}) 🔽`;
   }
 }
