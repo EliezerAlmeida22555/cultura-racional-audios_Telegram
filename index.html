@@ -202,6 +202,74 @@
     box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
   }
 
+  /* Lista de Faixas Expansível */
+  .expand-tracks-btn {
+    width: 100%;
+    margin-top: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--accent);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.82em;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .expand-tracks-btn:active { transform: scale(0.98); }
+
+  .tracks-list-container {
+    margin-top: 10px;
+    padding: 10px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .track-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: var(--bg-card);
+    border-radius: 6px;
+    font-size: 0.82em;
+  }
+  .track-name { font-weight: 600; color: #fff; }
+  .track-btns { display: flex; gap: 6px; }
+
+  .track-play-btn {
+    background: #22c55e;
+    color: #fff;
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.8em;
+  }
+  .track-mark-btn {
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    border: none;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.8em;
+    cursor: pointer;
+  }
+  .track-mark-btn.active {
+    background: #eab308 !important;
+    color: #000 !important;
+  }
+
   /* Stepper de Controle Livre de Faixas */
   .stepper-box {
     display: flex;
@@ -854,7 +922,6 @@ function haptic() {
 function abrirLinkTelegram(url) {
   haptic();
   try {
-    // tg.openLink abre o link mantendo o WebApp ativo sem fechar o Mini App!
     if (tg && typeof tg.openLink === 'function') {
       tg.openLink(url);
       return false;
@@ -885,17 +952,28 @@ function obterThreadId(volNome) {
   return null;
 }
 
-// Gera o link direto para a Faixa F do Volume no Telegram (direciona dinamicamente para a mensagem do áudio no topo!)
+// Gera o link direto para a Faixa F do Volume no Telegram
 function obterLinkFaixa(volNome, faixaNum = 1) {
   const threadId = obterThreadId(volNome);
   if (!threadId) return 'https://t.me/CULTURA_RACIONAL_AUDIOS';
   
   const f = Math.max(1, parseInt(faixaNum) || 1);
-  
-  // Para todos os tópicos e volumes (inclusive a nova coleção MUSICAS)
-  // No Telegram, a Faixa F é o message_id exato do áudio (threadId + 1 + f)
   const msgId = parseInt(threadId) + 1 + f;
   return GROUP_LINK + msgId;
+}
+
+function toggleFaixasVolume(cleanId) {
+  haptic();
+  const el = document.getElementById('tracks-list-' + cleanId);
+  const btn = document.getElementById('btn-expand-' + cleanId);
+  if (!el) return;
+  if (el.style.display === 'none' || !el.style.display) {
+    el.style.display = 'flex';
+    if (btn) btn.innerHTML = '🎵 Ocultar Lista de Faixas 🔼';
+  } else {
+    el.style.display = 'none';
+    if (btn) btn.innerHTML = '🎵 Ver Lista de Faixas (1 a 15) 🔽';
+  }
 }
 
 // --- GERENCIADOR MULTI-MARCADORES (LOCALSTORAGE + TELEGRAM CLOUDSTORAGE) ---
@@ -1121,6 +1199,28 @@ function renderizarOndePareiView() {
           <button class="step-btn" onclick="alterarInputFaixa('input-card-${cleanId}', 1)">➕</button>
           <button class="salvar-chip-btn" onclick="salvarFaixaDoInput('${volNome}', 'input-card-${cleanId}')">📌 Salvar Nova Faixa</button>
         </div>
+
+        <!-- Botão para Expandir Lista de Faixas de Áudio -->
+        <button class="expand-tracks-btn" id="btn-expand-card-${cleanId}" onclick="toggleFaixasVolume('card-${cleanId}')">
+          🎵 Ver Lista de Faixas (1 a 15) 🔽
+        </button>
+
+        <!-- Lista Expansível de Faixas de Áudio -->
+        <div id="tracks-list-card-${cleanId}" class="tracks-list-container" style="display:none;">
+          ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(f => {
+            const linkF = obterLinkFaixa(volNome, f);
+            const isFSelected = faixaAtual === f;
+            return `
+              <div class="track-row">
+                <span class="track-name">🎵 Faixa ${f}</span>
+                <div class="track-btns">
+                  <a href="${linkF}" onclick="return abrirLinkTelegram('${linkF}')" target="_blank" class="track-play-btn">▶️ Tocar F.${f}</a>
+                  <button class="track-mark-btn ${isFSelected ? 'active' : ''}" onclick="salvarMarcador('${volNome}', ${f})">📌 Parei</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
       </div>
     `;
   });
@@ -1259,7 +1359,6 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
       `;
     }
 
-    // Gera atalhos dinâmicos de faixas de 1 a 10 + faixa salva se maior que 10
     const chipsList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     if (faixaSalvaNum > 10 && !chipsList.includes(faixaSalvaNum)) {
       chipsList.push(faixaSalvaNum);
@@ -1282,6 +1381,28 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
           <input type="number" id="input-${cleanId}" class="faixa-num-input" value="${faixaSalvaNum}" min="1" max="100" />
           <button class="step-btn" onclick="alterarInputFaixa('input-${cleanId}', 1)">➕</button>
           <button class="salvar-chip-btn" onclick="salvarFaixaDoInput('${nome}', 'input-${cleanId}')">📌 Salvar Faixa</button>
+        </div>
+
+        <!-- Botão para Expandir Lista de Faixas de Áudio -->
+        <button class="expand-tracks-btn" id="btn-expand-${cleanId}" onclick="toggleFaixasVolume('${cleanId}')">
+          🎵 Ver Lista de Faixas (1 a 15) 🔽
+        </button>
+
+        <!-- Lista Expansível de Faixas de Áudio -->
+        <div id="tracks-list-${cleanId}" class="tracks-list-container" style="display:none;">
+          ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(f => {
+            const linkF = obterLinkFaixa(nome, f);
+            const isFSelected = mSalvo && parseInt(mSalvo.faixa) === f;
+            return `
+              <div class="track-row">
+                <span class="track-name">🎵 Faixa ${f}</span>
+                <div class="track-btns">
+                  <a href="${linkF}" onclick="return abrirLinkTelegram('${linkF}')" target="_blank" class="track-play-btn">▶️ Tocar F.${f}</a>
+                  <button class="track-mark-btn ${isFSelected ? 'active' : ''}" onclick="salvarMarcador('${nome}', ${f})">📌 Parei</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
         </div>
       </div>
     `;
