@@ -6673,28 +6673,41 @@ function salvarMarcador(volNome, faixaNum) {
   const fNum = Math.max(1, parseInt(faixaNum) || 1);
   dict[volNome] = {
     faixa: fNum,
+    tocando: false,
     data: new Date().toLocaleDateString('pt-BR')
   };
   salvarMarcadoresDict(dict);
-  
-  if (document.getElementById('marcador-card-container')) {
-    mostrarOndeParei();
-  } else if (window.currentLista) {
-    renderizarResultados(window.currentLista, window.currentTitulo || 'Resultados', window.currentPagina || 1);
-  }
+  atualizarTelaSemFecharListas();
 }
 
 function tocarFaixa(volNome, faixaNum) {
   haptic();
   const fNum = Math.max(1, parseInt(faixaNum) || 1);
   const dict = obterMarcadores();
+  const mAtual = dict[volNome];
+  
+  // Alterna entre Tocando e Parado ao clicar no mesmo botão
+  if (mAtual && parseInt(mAtual.faixa) === fNum && mAtual.tocando) {
+    dict[volNome].tocando = false;
+    salvarMarcadoresDict(dict);
+    atualizarTelaSemFecharListas();
+    return;
+  }
+  
   dict[volNome] = {
     faixa: fNum,
+    tocando: true,
     data: new Date().toLocaleDateString('pt-BR')
   };
   salvarMarcadoresDict(dict);
+  
   const linkF = obterLinkFaixa(volNome, fNum);
   abrirLinkTelegram(linkF);
+  
+  atualizarTelaSemFecharListas();
+}
+
+function atualizarTelaSemFecharListas() {
   if (document.getElementById('marcador-card-container')) {
     mostrarOndeParei();
   } else if (window.currentLista) {
@@ -6826,10 +6839,10 @@ function renderizarOndePareiView() {
     const isSingle = isSingleTopicCollection(volNome);
     const cleanId = norm(volNome).replace(/[^a-z0-9]/g, '');
 
-    const listaF = obterListaFaixas(volNome);
-    const countF = listaF ? listaF.length : 15;
+    const isExpanded = expandedVolumesSet.has('card-' + cleanId);
+    const displayStyle = isExpanded ? 'display:flex;' : 'display:none;';
+    const btnText = isExpanded ? '🎵 Ocultar Lista de Faixas 🔼' : `🎵 Ver Lista de Faixas (${countF} faixas) 🔽`;
 
-    const eVol = esc(volNome);
     html += `
       <div class="card-box" style="margin-bottom:14px;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
@@ -6865,18 +6878,19 @@ function renderizarOndePareiView() {
 
         <!-- Botão para Expandir Lista de Faixas de Áudio -->
         <button class="expand-tracks-btn" id="btn-expand-card-${cleanId}" onclick="toggleFaixasVolume('card-${cleanId}', ${countF})">
-          🎵 Ver Lista de Faixas (${countF} faixas) 🔽
+          ${btnText}
         </button>
 
         <!-- Lista Expansível de Faixas de Áudio com nomes reais -->
-        <div id="tracks-list-card-${cleanId}" class="tracks-list-container" style="display:none;">
+        <div id="tracks-list-card-${cleanId}" class="tracks-list-container" style="${displayStyle}">
           ${(listaF || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).map((itemF, idx) => {
             const f = idx + 1;
             const tituloF = typeof itemF === 'string' ? itemF : ('Faixa ' + f);
             const linkF = obterLinkFaixa(volNome, f);
+            const isFTocando = (faixaAtual === f && info.tocando !== false);
             const isFSelected = (faixaAtual === f);
-            const playBtnText = isFSelected ? '🔊 Tocando...' : '▶️ Tocar';
-            const playBtnClass = isFSelected ? 'track-play-btn playing' : 'track-play-btn';
+            const playBtnText = isFTocando ? '🔊 Tocando...' : '▶️ Tocar';
+            const playBtnClass = isFTocando ? 'track-play-btn playing' : 'track-play-btn';
             return `
               <div class="track-row">
                 <span class="track-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%; font-size:0.82em;" title="${tituloF}">🎵 ${tituloF}</span>
@@ -7035,6 +7049,9 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
 
     const listaF = obterListaFaixas(nome);
     const countF = listaF ? listaF.length : 15;
+    const isExpanded = expandedVolumesSet.has(cleanId);
+    const displayStyle = isExpanded ? 'display:flex;' : 'display:none;';
+    const btnText = isExpanded ? '🎵 Ocultar Lista de Faixas 🔼' : `🎵 Ver Lista de Faixas (${countF} faixas) 🔽`;
 
     html += `
         <a class="vol-btn-link" href="${linkAudio1}" onclick="return abrirLinkTelegram('${linkAudio1}')" target="_blank">🎧 ABRIR ${nome} NO TELEGRAM</a>
@@ -7056,18 +7073,19 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
 
         <!-- Botão para Expandir Lista de Faixas de Áudio -->
         <button class="expand-tracks-btn" id="btn-expand-${cleanId}" onclick="toggleFaixasVolume('${cleanId}', ${countF})">
-          🎵 Ver Lista de Faixas (${countF} faixas) 🔽
+          ${btnText}
         </button>
 
         <!-- Lista Expansível de Faixas de Áudio com nomes reais -->
-        <div id="tracks-list-${cleanId}" class="tracks-list-container" style="display:none;">
+        <div id="tracks-list-${cleanId}" class="tracks-list-container" style="${displayStyle}">
           ${(listaF || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).map((itemF, idx) => {
             const f = idx + 1;
             const tituloF = typeof itemF === 'string' ? itemF : ('Faixa ' + f);
             const linkF = obterLinkFaixa(nome, f);
+            const isFTocando = mSalvo && parseInt(mSalvo.faixa) === f && mSalvo.tocando !== false;
             const isFSelected = mSalvo && parseInt(mSalvo.faixa) === f;
-            const playBtnText = isFSelected ? '🔊 Tocando...' : '▶️ Tocar';
-            const playBtnClass = isFSelected ? 'track-play-btn playing' : 'track-play-btn';
+            const playBtnText = isFTocando ? '🔊 Tocando...' : '▶️ Tocar';
+            const playBtnClass = isFTocando ? 'track-play-btn playing' : 'track-play-btn';
             return `
               <div class="track-row">
                 <span class="track-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%; font-size:0.82em;" title="${tituloF}">🎵 ${tituloF}</span>
