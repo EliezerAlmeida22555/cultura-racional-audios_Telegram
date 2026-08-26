@@ -1060,7 +1060,12 @@ function carregarCloudStorage(callback) {
   if (callback) callback();
 }
 
+function esc(s) {
+  return String(s || '').replace(/'/g, "\\'");
+}
+
 function salvarMarcador(volNome, faixaNum) {
+  haptic();
   const dict = obterMarcadores();
   const fNum = Math.max(1, parseInt(faixaNum) || 1);
   dict[volNome] = {
@@ -1068,7 +1073,6 @@ function salvarMarcador(volNome, faixaNum) {
     data: new Date().toLocaleDateString('pt-BR')
   };
   salvarMarcadoresDict(dict);
-  alert(`📌 Ponto salvo com sucesso!\n\n📖 Volume: ${volNome}\n🎵 Faixa ${fNum}`);
   
   if (document.getElementById('marcador-card-container')) {
     mostrarOndeParei();
