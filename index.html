@@ -1073,6 +1073,24 @@ function salvarMarcador(volNome, faixaNum) {
   }
 }
 
+function tocarFaixa(volNome, faixaNum) {
+  haptic();
+  const fNum = Math.max(1, parseInt(faixaNum) || 1);
+  const dict = obterMarcadores();
+  dict[volNome] = {
+    faixa: fNum,
+    data: new Date().toLocaleDateString('pt-BR')
+  };
+  salvarMarcadoresDict(dict);
+  const linkF = obterLinkFaixa(volNome, fNum);
+  abrirLinkTelegram(linkF);
+  if (document.getElementById('marcador-card-container')) {
+    mostrarOndeParei();
+  } else if (window.currentLista) {
+    renderizarResultados(window.currentLista, window.currentTitulo || 'Resultados', window.currentPagina || 1);
+  }
+}
+
 function alterarInputFaixa(inputId, delta) {
   const inp = document.getElementById(inputId);
   if (!inp) return;
