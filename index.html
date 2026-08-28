@@ -7409,6 +7409,11 @@ function buscarVolumes(termo) {
     }
     if (colEstrita) return nNorm.includes(norm(colEstrita));
     return nNorm.includes(norm(termo)) || extrairNum(nome) === extrairNum(termo);
+  }).sort(([a], [b]) => {
+    const numA = extrairNum(a);
+    const numB = extrairNum(b);
+    if (numA !== numB) return numA - numB;
+    return a.localeCompare(b, 'pt-BR', { numeric: true });
   });
 }
 
@@ -7572,6 +7577,13 @@ function mudarPagina(titulo, novaPagina) {
 function abrirColecao(col) {
   haptic();
   const volumes = Object.entries(TOPICOS).filter(([n]) => n.startsWith(col + ' - ') || n === col);
+  // Ordena os volumes numericamente crescente (A1, A2... A10... A100)
+  volumes.sort(([a], [b]) => {
+    const numA = extrairNum(a);
+    const numB = extrairNum(b);
+    if (numA !== numB) return numA - numB;
+    return a.localeCompare(b, 'pt-BR', { numeric: true });
+  });
   document.getElementById('search').value = col;
   renderizarResultados(volumes, `Coleção ${col}`);
 }
@@ -7585,7 +7597,17 @@ function resetarParaColecoes() {
 }
 
 function montarBotoesColecoes() {
-  const cols = [...new Set(Object.keys(TOPICOS).map(n => n.includes(' - ') ? n.split(' - ')[0].trim() : n.trim()))].sort();
+  const ordemDesejada = ['AMARELÕES', 'OBRA', 'RÉPLICA', 'TRÉPLICA', 'HISTÓRICO', 'MUSICAS'];
+  const colsExistentes = [...new Set(Object.keys(TOPICOS).map(n => n.includes(' - ') ? n.split(' - ')[0].trim() : n.trim()))];
+  
+  const cols = colsExistentes.sort((a, b) => {
+    const idxA = ordemDesejada.indexOf(a.toUpperCase());
+    const idxB = ordemDesejada.indexOf(b.toUpperCase());
+    const posA = idxA !== -1 ? idxA : 999;
+    const posB = idxB !== -1 ? idxB : 999;
+    return posA - posB;
+  });
+
   const grid = document.getElementById('colecoes-grid');
   if (!grid) return;
   grid.innerHTML = '';
