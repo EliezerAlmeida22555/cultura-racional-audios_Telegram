@@ -112,13 +112,13 @@
   .col-card:active { transform: scale(0.96); }
   .col-span2 { grid-column: span 2; }
 
-  .col-AMARELÕES  { background: linear-gradient(135deg, #d97706, #b45309); }
-  .col-OBRA       { background: linear-gradient(135deg, #15803d, #166534); }
-  .col-RÉPLICA    { background: linear-gradient(135deg, #b91c1c, #991b1b); }
-  .col-TRÉPLICA   { background: linear-gradient(135deg, #1d4ed8, #1e40af); }
-  .col-HISTÓRICO  { background: linear-gradient(135deg, #6b21a8, #581c87); }
-  .col-MUSICAS    { background: linear-gradient(135deg, #0d9488, #0f766e); }
-  .col-default    { background: linear-gradient(135deg, #475569, #334155); }
+  .col-AMARELÕES  { background: linear-gradient(135deg, #FFD700, #B8860B); color: #1a1000; }
+  .col-OBRA       { background: linear-gradient(135deg, #56CCF2, #2D9CDB); color: #fff; }
+  .col-RÉPLICA    { background: linear-gradient(135deg, #27AE60, #1E8449); color: #fff; }
+  .col-TRÉPLICA   { background: linear-gradient(135deg, #2B4EBF, #1A3498); color: #fff; }
+  .col-HISTÓRICO  { background: linear-gradient(135deg, #009C3B, #006B29); color: #fff; }
+  .col-MUSICAS    { background: linear-gradient(135deg, #ffffff, #e2e8f0); color: #0f172a; }
+  .col-default    { background: linear-gradient(135deg, #475569, #334155); color: #fff; }
 
   /* Seção de Conteúdo e Resultados */
   .card-box {
@@ -7633,8 +7633,17 @@ function montarBotoesColecoes() {
     if (cols.length % 2 !== 0 && idx === cols.length - 1) btn.classList.add('col-span2');
     
     const emoji = EMOJIS[col.toUpperCase()] || EMOJI_PADRAO;
-    const qtd = Object.keys(TOPICOS).filter(k => k.startsWith(col + ' - ') || k === col).length;
-    btn.innerHTML = `${emoji} ${col}<br><small style="font-weight:normal; opacity:0.85;">${qtd} Vols disponíveis</small>`;
+    const volsCol = Object.keys(TOPICOS).filter(k => k.startsWith(col + ' - ') || k === col);
+    const isSingleVol = volsCol.length === 1 && volsCol[0] === col;
+    let subLabel;
+    if (isSingleVol) {
+      // Coleção sem subpastas (ex: MUSICAS): mostra qtd de faixas
+      const faixasCol = (FAIXAS && FAIXAS[col]) ? FAIXAS[col].length : 0;
+      subLabel = faixasCol > 0 ? `${faixasCol} faixas disponíveis` : '1 vol disponível';
+    } else {
+      subLabel = `${volsCol.length} Vols disponíveis`;
+    }
+    btn.innerHTML = `${emoji} ${col}<br><small style="font-weight:normal; opacity:0.85;">${subLabel}</small>`;
     btn.onclick = () => abrirColecao(col);
     grid.appendChild(btn);
   });
