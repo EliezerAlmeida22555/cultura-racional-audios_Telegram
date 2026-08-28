@@ -6948,6 +6948,8 @@ const FAIXAS = {
     "01. Int 1a- Nada se perde..."
   ]
 };
+// Mapa com o ID real da mensagem da Faixa 1 de cada volume (calculado automaticamente)
+const FAIXA1_IDS = {};
 
 function obterListaFaixas(volNome) {
   if (FAIXAS && FAIXAS[volNome] && FAIXAS[volNome].length) return FAIXAS[volNome];
@@ -6996,30 +6998,28 @@ function haptic() {
   } catch(e) {}
 }
 
-// Método para abrir diretamente no TELEGRAM DESKTOP ou APP NATIVO (sem abrir o Telegram Web!)
+// Método para abrir diretamente no TELEGRAM DESKTOP ou APP NATIVO
 function abrirLinkTelegram(url) {
   haptic();
   if (!url) return false;
 
-  let tgProtocolUrl = url;
-  if (!url.startsWith('tg://')) {
-    const m = String(url).match(/t\.me\/c\/(\d+)\/(\d+)/);
-    if (m) {
-      tgProtocolUrl = `tg://privatepost?channel=${m[1]}&post=${m[2]}`;
-    }
+  let httpsUrl = url;
+  if (url.startsWith('tg://privatepost')) {
+    const m = url.match(/channel=(\d+)&post=(\d+)/);
+    if (m) httpsUrl = `https://t.me/c/${m[1]}/${m[2]}`;
   }
 
-  // 1. Tenta usar o SDK oficial do Telegram WebApp
+  // 1. Tenta usar o SDK oficial do Telegram WebApp com URL HTTPS válida
   try {
     if (tg && typeof tg.openTelegramLink === 'function') {
-      tg.openTelegramLink(tgProtocolUrl);
+      tg.openTelegramLink(httpsUrl);
       return false;
     }
   } catch(e) {}
 
-  // 2. Tenta acionar o protocolo nativo tg:// do Telegram Desktop no computador
+  // 2. Fallback para redirecionamento nativo no navegador
   try {
-    window.location.href = tgProtocolUrl;
+    window.location.href = httpsUrl;
     return false;
   } catch(e) {}
 
@@ -7041,14 +7041,22 @@ function obterThreadId(volNome) {
   return null;
 }
 
-// Gera o link nativo direto para a Faixa F exata do Volume no Telegram (sem pular faixa)
+// Gera o link exato para o Tópico e a Faixa F no Telegram (no formato https://t.me/c/CHAT_ID/THREAD_ID/MSG_ID)
 function obterLinkFaixa(volNome, faixaNum = 1) {
   const threadId = obterThreadId(volNome);
-  if (!threadId) return 'tg://resolve?domain=CULTURA_RACIONAL_AUDIOS';
+  if (!threadId) return 'https://t.me/c/4415417039';
   
   const f = Math.max(1, parseInt(faixaNum) || 1);
-  const msgId = parseInt(threadId) + f;
-  return 'tg://privatepost?channel=4415417039&post=' + msgId;
+  const faixa1Id = (typeof FAIXA1_IDS !== 'undefined' && FAIXA1_IDS) ? FAIXA1_IDS[volNome] : null;
+  
+  let msgId;
+  if (faixa1Id) {
+    msgId = parseInt(faixa1Id) + (f - 1);
+  } else {
+    msgId = parseInt(threadId) + f;
+  }
+
+  return `https://t.me/c/4415417039/${threadId}/${msgId}`;
 }
 
 const expandedVolumesSet = new Set();
