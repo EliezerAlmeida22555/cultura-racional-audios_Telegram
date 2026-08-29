@@ -6949,7 +6949,91 @@ const FAIXAS = {
   ]
 };
 // Mapa com o ID real da mensagem da Faixa 1 de cada volume (calculado automaticamente)
-const FAIXA1_IDS = {};
+const FAIXA1_IDS = {
+  "RÉPLICA - R05": 1562,
+  "RÉPLICA - R04": 1545,
+  "RÉPLICA - R03": 1545,
+  "RÉPLICA - R02": 1545,
+  "TRÉPLICA - T09": 1803,
+  "TRÉPLICA - T12": 1803,
+  "TRÉPLICA - T10": 1803,
+  "TRÉPLICA - T11": 1803,
+  "TRÉPLICA - T08": 1803,
+  "HISTÓRICO - H004": 1868,
+  "TRÉPLICA - T18": 1837,
+  "HISTÓRICO - H007": 1888,
+  "TRÉPLICA - T20": 1847,
+  "HISTÓRICO - H006": 1882,
+  "TRÉPLICA - T14": 1816,
+  "HISTÓRICO - H005": 1876,
+  "TRÉPLICA - T16": 1827,
+  "HISTÓRICO - H011": 1921,
+  "HISTÓRICO - H012": 1928,
+  "HISTÓRICO - H003": 1877,
+  "HISTÓRICO - H015": 1944,
+  "TRÉPLICA - T15": 1833,
+  "HISTÓRICO - H014": 1942,
+  "HISTÓRICO - H002": 1871,
+  "HISTÓRICO - H018": 1957,
+  "HISTÓRICO - H009": 1920,
+  "TRÉPLICA - T13": 1832,
+  "HISTÓRICO - H010": 1925,
+  "HISTÓRICO - H022": 1977,
+  "HISTÓRICO - H008": 1919,
+  "HISTÓRICO - H019": 1968,
+  "HISTÓRICO - H031": 2026,
+  "HISTÓRICO - H030": 2023,
+  "HISTÓRICO - H017": 1965,
+  "HISTÓRICO - H016": 1963,
+  "HISTÓRICO - H020": 1978,
+  "HISTÓRICO - H029": 2022,
+  "HISTÓRICO - H028": 2022,
+  "HISTÓRICO - H027": 2022,
+  "HISTÓRICO - H063": 2213,
+  "HISTÓRICO - H062": 2213,
+  "HISTÓRICO - H061": 2213,
+  "HISTÓRICO - H060": 2213,
+  "HISTÓRICO - H059": 2213,
+  "HISTÓRICO - H128": 2612,
+  "HISTÓRICO - H127": 2612,
+  "HISTÓRICO - H137": 2670,
+  "HISTÓRICO - H126": 2612,
+  "HISTÓRICO - H136": 2670,
+  "HISTÓRICO - H125": 2612,
+  "HISTÓRICO - H135": 2670,
+  "HISTÓRICO - H124": 2612,
+  "HISTÓRICO - H134": 2670,
+  "HISTÓRICO - H154": 2794,
+  "HISTÓRICO - H155": 2821,
+  "HISTÓRICO - H150": 2756,
+  "HISTÓRICO - H153": 2794,
+  "HISTÓRICO - H149": 2756,
+  "HISTÓRICO - H148": 2756,
+  "HISTÓRICO - H152": 2794,
+  "HISTÓRICO - H151": 2794,
+  "HISTÓRICO - H147": 2756,
+  "HISTÓRICO - H166": 2990,
+  "HISTÓRICO - H170": 3024,
+  "HISTÓRICO - H164": 2990,
+  "HISTÓRICO - H165": 2990,
+  "HISTÓRICO - H163": 2990,
+  "HISTÓRICO - H169": 3024,
+  "HISTÓRICO - H162": 2990,
+  "HISTÓRICO - H168": 3024,
+  "HISTÓRICO - H167": 3024,
+  "TRÉPLICA - T17": 1832,
+  "TRÉPLICA - T19": 1842,
+  "TRÉPLICA - T21": 1868,
+  "OBRA - O18": 11456,
+  "OBRA - O19": 12158,
+  "OBRA - O01": 12598,
+  "OBRA - O12": 12855,
+  "OBRA - O21": 13242,
+  "OBRA - O17": 5833,
+  "OBRA - O02": 13960,
+  "AMARELÕES - A01": 11088,
+  "MUSICAS": 5439
+};
 
 function obterListaFaixas(volNome) {
   if (FAIXAS && FAIXAS[volNome] && FAIXAS[volNome].length) return FAIXAS[volNome];
@@ -7041,22 +7125,28 @@ function obterThreadId(volNome) {
   return null;
 }
 
-// Gera o link exato para o Tópico e a Faixa F no Telegram (no formato https://t.me/c/CHAT_ID/THREAD_ID/MSG_ID)
+// Gera o link para o Tópico e a Faixa F no Telegram
+// Retorna objeto: { url, exato: boolean, threadId, msgId }
 function obterLinkFaixa(volNome, faixaNum = 1) {
   const threadId = obterThreadId(volNome);
-  if (!threadId) return 'https://t.me/c/4415417039';
+  if (!threadId) return { url: 'https://t.me/c/4415417039', exato: false, threadId: null, msgId: null };
   
   const f = Math.max(1, parseInt(faixaNum) || 1);
   const faixa1Id = (typeof FAIXA1_IDS !== 'undefined' && FAIXA1_IDS) ? FAIXA1_IDS[volNome] : null;
   
-  let msgId;
   if (faixa1Id) {
-    msgId = parseInt(faixa1Id) + (f - 1);
+    const msgId = parseInt(faixa1Id) + (f - 1);
+    return { url: `https://t.me/c/4415417039/${threadId}/${msgId}`, exato: true, threadId, msgId };
   } else {
-    msgId = parseInt(threadId) + f;
+    // Sem offset detectado: link genérico do tópico (abre no tópico, usuário navega)
+    return { url: `https://t.me/c/4415417039/${threadId}`, exato: false, threadId, msgId: null };
   }
+}
 
-  return `https://t.me/c/4415417039/${threadId}/${msgId}`;
+// Verifica se o volume tem offset de faixa1 detectado
+function temOffsetDetectado(volNome) {
+  const faixa1Id = (typeof FAIXA1_IDS !== 'undefined' && FAIXA1_IDS) ? FAIXA1_IDS[volNome] : null;
+  return !!faixa1Id;
 }
 
 const expandedVolumesSet = new Set();
@@ -7167,7 +7257,7 @@ function tocarFaixa(volNome, faixaNum) {
   salvarMarcadoresDict(dict);
   
   const linkF = obterLinkFaixa(volNome, fNum);
-  abrirLinkTelegram(linkF);
+  abrirLinkTelegram(linkF.url);
   
   atualizarTelaSemFecharListas();
 }
@@ -7323,7 +7413,7 @@ function renderizarOndePareiView() {
           📅 <b>Marcado em:</b> ${info.data}
         </div>
         
-        <button type="button" class="vol-btn-link" onclick="abrirLinkTelegram('${linkFaixa}')" style="background:#22c55e;">
+        <button type="button" class="vol-btn-link" onclick="abrirLinkTelegram('${linkFaixa.url}')" style="background:#22c55e;">
           ▶️ IR PARA ${isSingle ? volNome : 'FAIXA ' + faixaAtual + ' DE ' + volNome} NO TELEGRAM
         </button>
 
@@ -7355,7 +7445,6 @@ function renderizarOndePareiView() {
           ${(listaF || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).map((itemF, idx) => {
             const f = idx + 1;
             const tituloF = typeof itemF === 'string' ? itemF : ('Faixa ' + f);
-            const linkF = obterLinkFaixa(volNome, f);
             const isFTocando = (faixaAtual === f && info.tocando !== false);
             const isFSelected = (faixaAtual === f);
             const playBtnText = isFTocando ? '🔊 Tocando...' : '▶️ Tocar';
@@ -7403,7 +7492,7 @@ function sortearAudioDia() {
         📖 <b>Volume Sorteado:</b> ${sorteado}<br><br>
         <i>"Leia a Cultura Racional para obter o conhecimento do seu verdadeiro estado natural de Racional."</i>
       </div>
-      <button type="button" class="vol-btn-link" onclick="abrirLinkTelegram('${linkAudio1}')">🎧 OUVIR ${sorteado} NO TELEGRAM</button>
+      <button type="button" class="vol-btn-link" onclick="abrirLinkTelegram('${linkAudio1.url}')">🎧 OUVIR ${sorteado} NO TELEGRAM</button>
       <br><br>
       <div style="display:flex; gap:8px;">
         <button class="voltar-btn" onclick="sortearAudioDia()">🎲 Sortear Outro</button>
@@ -7508,7 +7597,7 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
         <div class="saved-badge">
           <div>📍 <b>Ponto Salvo:</b> Faixa ${mSalvo.faixa} <small>(${mSalvo.data})</small></div>
           <div class="badge-actions">
-            <button type="button" onclick="abrirLinkTelegram('${linkPonto}')" style="background:transparent; border:none; color:#4ade80; font-weight:bold; font-size:0.9em; cursor:pointer;">▶️ ${isSingle ? 'Abrir Músicas' : 'Ir para F.' + mSalvo.faixa}</button>
+            <button type="button" onclick="abrirLinkTelegram('${linkPonto.url}')" style="background:transparent; border:none; color:#4ade80; font-weight:bold; font-size:0.9em; cursor:pointer;">▶️ ${isSingle ? 'Abrir Músicas' : 'Ir para F.' + mSalvo.faixa}</button>
             <button class="del-btn-sm" onclick="removerMarcador('${eNome}')">🗑️ Apagar</button>
           </div>
         </div>
@@ -7528,7 +7617,7 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
     const btnText = isExpanded ? '🎵 Ocultar Lista de Faixas 🔼' : `🎵 Ver Lista de Faixas (${countF} faixas) 🔽`;
 
     html += `
-        <button type="button" class="vol-btn-link" onclick="abrirLinkTelegram('${linkAudio1}')">🎧 ABRIR ${nome} NO TELEGRAM</button>
+        <button type="button" class="vol-btn-link" onclick="abrirLinkTelegram('${linkAudio1.url}')">🎧 ABRIR ${nome} NO TELEGRAM</button>
         
         <div class="faixas-marks">
           <span style="font-size:0.75em; color:var(--text-secondary); width:100%;">Marcar onde parou neste volume:</span>
@@ -7555,7 +7644,6 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
           ${(listaF || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).map((itemF, idx) => {
             const f = idx + 1;
             const tituloF = typeof itemF === 'string' ? itemF : ('Faixa ' + f);
-            const linkF = obterLinkFaixa(nome, f);
             const isFTocando = mSalvo && parseInt(mSalvo.faixa) === f && mSalvo.tocando !== false;
             const isFSelected = mSalvo && parseInt(mSalvo.faixa) === f;
             const playBtnText = isFTocando ? '🔊 Tocando...' : '▶️ Tocar';
