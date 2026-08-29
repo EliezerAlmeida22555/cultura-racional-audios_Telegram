@@ -7416,6 +7416,7 @@ function renderizarOndePareiView() {
         <button type="button" class="vol-btn-link" onclick="abrirLinkTelegram('${linkFaixa.url}')" style="background:#22c55e;">
           ▶️ IR PARA ${isSingle ? volNome : 'FAIXA ' + faixaAtual + ' DE ' + volNome} NO TELEGRAM
         </button>
+        ${!linkFaixa.exato ? `<div style=\"margin-top:8px; padding:8px 12px; background:rgba(251,191,36,0.15); border:1px solid #fbbf24; border-radius:8px; font-size:0.75em; color:#fbbf24; display:flex; align-items:center; gap:8px;\">⚠️ <b>Offset não detectado</b> — Link abre o tópico. Navegue até a faixa desejada.</div>` : ''}
 
         <!-- Controles rápidos de faixa e volume -->
         <div class="ctrl-grid">
@@ -7493,6 +7494,7 @@ function sortearAudioDia() {
         <i>"Leia a Cultura Racional para obter o conhecimento do seu verdadeiro estado natural de Racional."</i>
       </div>
       <button type="button" class="vol-btn-link" onclick="abrirLinkTelegram('${linkAudio1.url}')">🎧 OUVIR ${sorteado} NO TELEGRAM</button>
+      ${!linkAudio1.exato ? `<div style=\"margin-top:8px; padding:8px 12px; background:rgba(251,191,36,0.15); border:1px solid #fbbf24; border-radius:8px; font-size:0.75em; color:#fbbf24; display:flex; align-items:center; gap:8px;\">⚠️ <b>Offset não detectado</b> — Link abre o tópico. Navegue até a faixa desejada.</div>` : ''}
       <br><br>
       <div style="display:flex; gap:8px;">
         <button class="voltar-btn" onclick="sortearAudioDia()">🎲 Sortear Outro</button>
@@ -7618,6 +7620,7 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
 
     html += `
         <button type="button" class="vol-btn-link" onclick="abrirLinkTelegram('${linkAudio1.url}')">🎧 ABRIR ${nome} NO TELEGRAM</button>
+        ${!linkAudio1.exato ? `<div style=\"margin-top:8px; padding:8px 12px; background:rgba(251,191,36,0.15); border:1px solid #fbbf24; border-radius:8px; font-size:0.75em; color:#fbbf24; display:flex; align-items:center; gap:8px;\">⚠️ <b>Offset não detectado</b> — Link abre o tópico. Navegue até a faixa desejada.</div>` : ''}
         
         <div class="faixas-marks">
           <span style="font-size:0.75em; color:var(--text-secondary); width:100%;">Marcar onde parou neste volume:</span>
