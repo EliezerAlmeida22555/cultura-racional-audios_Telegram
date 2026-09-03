@@ -7587,24 +7587,26 @@ function abrirLinkTelegram(url) {
   haptic();
   if (!url) return false;
 
-  let httpsUrl = url;
-  if (url.startsWith('tg://privatepost')) {
-    const m = url.match(/channel=(\d+)&post=(\d+)/);
-    if (m) httpsUrl = `https://t.me/c/${m[1]}/${m[2]}`;
-  }
-
-  // Sempre usar window.open para NÃO fechar o WebApp
+  // 1. openTelegramLink (Bot API 7.0+: mantém WebApp aberto)
   try {
-    window.open(httpsUrl, '_blank');
-    return false;
-  } catch(e) {}
-
-  // Fallback: openLink
-  try {
-    if (tg && typeof tg.openLink === 'function') {
-      tg.openLink(httpsUrl);
+    if (tg && typeof tg.openTelegramLink === 'function') {
+      tg.openTelegramLink(url);
       return false;
     }
+  } catch(e) {}
+
+  // 2. openLink (abre em navegador externo)
+  try {
+    if (tg && typeof tg.openLink === 'function') {
+      tg.openLink(url);
+      return false;
+    }
+  } catch(e) {}
+
+  // 3. Fallback: nova aba
+  try {
+    window.open(url, '_blank');
+    return false;
   } catch(e) {}
 
   return false;
