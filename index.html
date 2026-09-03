@@ -7930,6 +7930,7 @@ const EMOJIS = {
 const EMOJI_PADRAO = '📁';
 
 const tg = window.Telegram && window.Telegram.WebApp;
+const isDesktop = tg && ['windows', 'macos', 'linux'].includes(tg.platform);
 if (tg) {
   try {
     tg.ready();
@@ -7959,7 +7960,9 @@ function haptic() {
   } catch(e) {}
 }
 
-// Método para abrir link no Telegram SEM fechar o WebApp e SEM popup de confirmação
+// Método para abrir link no Telegram
+// Desktop (Windows/macOS/Linux): mantém WebApp aberto com openTelegramLink
+// Web (web/webview): fecha WebApp ao abrir link
 function abrirLinkTelegram(url) {
   haptic();
   if (!url) return false;
@@ -7971,27 +7974,33 @@ function abrirLinkTelegram(url) {
     if (m) httpsUrl = `https://t.me/c/${m[1]}/${m[2]}`;
   }
 
-  // openTelegramLink abre links t.me DIRETO no Telegram sem popup de confirmação
-  try {
-    if (tg && typeof tg.openTelegramLink === 'function') {
-      tg.openTelegramLink(httpsUrl);
+  if (isDesktop) {
+    // Desktop: mantém WebApp aberto
+    try {
+      if (tg && typeof tg.openTelegramLink === 'function') {
+        tg.openTelegramLink(httpsUrl);
+        return false;
+      }
+    } catch(e) {}
+    try {
+      if (tg && typeof tg.openLink === 'function') {
+        tg.openLink(httpsUrl);
+        return false;
+      }
+    } catch(e) {}
+  } else {
+    // Web: fecha WebApp ao abrir link
+    try {
+      if (tg && typeof tg.openLink === 'function') {
+        tg.openLink(httpsUrl);
+        return false;
+      }
+    } catch(e) {}
+    try {
+      window.open(httpsUrl, '_blank');
       return false;
-    }
-  } catch(e) {}
-
-  // Fallback: openLink (pode mostrar confirmação em Desktop)
-  try {
-    if (tg && typeof tg.openLink === 'function') {
-      tg.openLink(httpsUrl);
-      return false;
-    }
-  } catch(e) {}
-
-  // Último recurso: window.open
-  try {
-    window.open(httpsUrl, '_blank');
-    return false;
-  } catch(e) {}
+    } catch(e) {}
+  }
 
   return false;
 }
