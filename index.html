@@ -7936,6 +7936,8 @@ if (tg) {
     tg.ready();
     tg.expand();
   } catch(e) {}
+  // Debug: log platform
+  console.log('[WebApp] platform:', tg.platform, 'isDesktop:', isDesktop, 'openTelegramLink:', typeof tg.openTelegramLink);
 }
 
 function norm(s) {
@@ -7974,32 +7976,38 @@ function abrirLinkTelegram(url) {
     if (m) httpsUrl = `https://t.me/c/${m[1]}/${m[2]}`;
   }
 
+  console.log('[WebApp] abrirLinkTelegram:', httpsUrl, 'isDesktop:', isDesktop);
+
   if (isDesktop) {
     // Desktop: mantém WebApp aberto
     try {
       if (tg && typeof tg.openTelegramLink === 'function') {
+        console.log('[WebApp] using openTelegramLink');
         tg.openTelegramLink(httpsUrl);
         return false;
       }
-    } catch(e) {}
+    } catch(e) { console.log('[WebApp] openTelegramLink error:', e); }
     try {
       if (tg && typeof tg.openLink === 'function') {
+        console.log('[WebApp] using openLink');
         tg.openLink(httpsUrl);
         return false;
       }
-    } catch(e) {}
+    } catch(e) { console.log('[WebApp] openLink error:', e); }
   } else {
     // Web: fecha WebApp ao abrir link
     try {
       if (tg && typeof tg.openLink === 'function') {
+        console.log('[WebApp] Web: using openLink');
         tg.openLink(httpsUrl);
         return false;
       }
-    } catch(e) {}
+    } catch(e) { console.log('[WebApp] Web openLink error:', e); }
     try {
+      console.log('[WebApp] Web: using window.open');
       window.open(httpsUrl, '_blank');
       return false;
-    } catch(e) {}
+    } catch(e) { console.log('[WebApp] Web window.open error:', e); }
   }
 
   return false;
