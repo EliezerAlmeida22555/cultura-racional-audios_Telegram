@@ -7593,26 +7593,18 @@ function abrirLinkTelegram(url) {
     if (m) httpsUrl = `https://t.me/c/${m[1]}/${m[2]}`;
   }
 
-  // 1. openTelegramLink (Bot API 7.0+: não fecha o WebApp)
+  // Sempre usar window.open para NÃO fechar o WebApp
   try {
-    if (tg && typeof tg.openTelegramLink === 'function') {
-      tg.openTelegramLink(httpsUrl);
-      return false;
-    }
+    window.open(httpsUrl, '_blank');
+    return false;
   } catch(e) {}
 
-  // 2. openLink (abre em navegador externo, nunca fecha o WebApp)
+  // Fallback: openLink
   try {
     if (tg && typeof tg.openLink === 'function') {
       tg.openLink(httpsUrl);
       return false;
     }
-  } catch(e) {}
-
-  // 3. Fallback: nova aba (mantém WebApp aberto)
-  try {
-    window.open(httpsUrl, '_blank');
-    return false;
   } catch(e) {}
 
   return false;
