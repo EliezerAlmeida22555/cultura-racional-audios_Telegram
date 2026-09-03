@@ -7636,10 +7636,10 @@ function obterLinkFaixa(volNome, faixaNum = 1) {
   
   if (faixa1Id) {
     const msgId = parseInt(faixa1Id) + (f - 1);
-    return { url: `https://t.me/c/4415417039/${threadId}/${msgId}`, exato: true, threadId, msgId };
+    return { url: `tg://privatepost?channel=4415417039&post=${msgId}`, exato: true, threadId, msgId };
   } else {
     // Sem offset detectado: link genérico do tópico (abre no tópico, usuário navega)
-    return { url: `https://t.me/c/4415417039/${threadId}`, exato: false, threadId, msgId: null };
+    return { url: `tg://privatepost?channel=4415417039&post=${threadId}`, exato: false, threadId, msgId: null };
   }
 }
 
