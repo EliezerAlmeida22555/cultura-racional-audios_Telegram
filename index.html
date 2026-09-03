@@ -7957,7 +7957,7 @@ function haptic() {
   } catch(e) {}
 }
 
-// Método para abrir link no Telegram SEM fechar o WebApp
+// Método para abrir link no Telegram SEM fechar o WebApp e SEM popup de confirmação
 function abrirLinkTelegram(url) {
   haptic();
   if (!url) return false;
@@ -7969,18 +7969,26 @@ function abrirLinkTelegram(url) {
     if (m) httpsUrl = `https://t.me/c/${m[1]}/${m[2]}`;
   }
 
-  // Usar window.open para NÃO fechar o WebApp
+  // openTelegramLink abre links t.me DIRETO no Telegram sem popup de confirmação
   try {
-    window.open(httpsUrl, '_blank');
-    return false;
+    if (tg && typeof tg.openTelegramLink === 'function') {
+      tg.openTelegramLink(httpsUrl);
+      return false;
+    }
   } catch(e) {}
 
-  // Fallback: openLink
+  // Fallback: openLink (pode mostrar confirmação em Desktop)
   try {
     if (tg && typeof tg.openLink === 'function') {
       tg.openLink(httpsUrl);
       return false;
     }
+  } catch(e) {}
+
+  // Último recurso: window.open
+  try {
+    window.open(httpsUrl, '_blank');
+    return false;
   } catch(e) {}
 
   return false;
