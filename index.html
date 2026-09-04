@@ -8035,6 +8035,7 @@ function obterLinkFaixa(volNome, faixaNum = 1) {
   
   if (faixa1Id) {
     const msgId = parseInt(faixa1Id) + (f - 1);
+    console.log('[WebApp] obterLinkFaixa:', volNome, 'faixaNum:', faixaNum, 'f:', f, 'faixa1Id:', faixa1Id, 'msgId:', msgId);
     return { url: `https://t.me/c/4415417039/${msgId}`, exato: true, threadId, msgId };
   } else {
     // Sem offset detectado: link genérico do tópico (abre no tópico, usuário navega)
