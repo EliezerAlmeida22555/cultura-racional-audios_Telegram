@@ -8034,7 +8034,9 @@ function obterLinkFaixa(volNome, faixaNum = 1) {
   const faixa1Id = (typeof FAIXA1_IDS !== 'undefined' && FAIXA1_IDS) ? FAIXA1_IDS[volNome] : null;
   
   if (faixa1Id) {
-    const msgId = parseInt(faixa1Id) + (f - 1);
+    // faixa1Id é o ID do título do tópico. Primeiro áudio = faixa1Id + 1
+    // Faixa f = faixa1Id + f
+    const msgId = parseInt(faixa1Id) + f;
     console.log('[WebApp] obterLinkFaixa:', volNome, 'faixaNum:', faixaNum, 'f:', f, 'faixa1Id:', faixa1Id, 'msgId:', msgId);
     return { url: `https://t.me/c/4415417039/${msgId}`, exato: true, threadId, msgId };
   } else {
