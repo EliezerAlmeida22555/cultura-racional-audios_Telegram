@@ -7930,7 +7930,7 @@ const EMOJIS = {
 const EMOJI_PADRAO = '📁';
 
 const tg = window.Telegram && window.Telegram.WebApp;
-const isDesktop = tg && ['windows', 'macos', 'linux'].includes(tg.platform);
+const isDesktop = tg && ['windows', 'macos', 'linux', 'unknown'].includes(tg.platform);
 if (tg) {
   try {
     tg.ready();
