@@ -7979,21 +7979,17 @@ function abrirLinkTelegram(url) {
   console.log('[WebApp] abrirLinkTelegram:', httpsUrl, 'isDesktop:', isDesktop);
 
   if (isDesktop) {
-    // Desktop: mantém WebApp aberto
+    // Desktop: mantém WebApp aberto - usa APENAS openTelegramLink
     try {
       if (tg && typeof tg.openTelegramLink === 'function') {
-        console.log('[WebApp] using openTelegramLink');
+        console.log('[WebApp] Desktop: using openTelegramLink');
         tg.openTelegramLink(httpsUrl);
         return false;
       }
     } catch(e) { console.log('[WebApp] openTelegramLink error:', e); }
-    try {
-      if (tg && typeof tg.openLink === 'function') {
-        console.log('[WebApp] using openLink');
-        tg.openLink(httpsUrl);
-        return false;
-      }
-    } catch(e) { console.log('[WebApp] openLink error:', e); }
+    // Se openTelegramLink não existe ou falhou, NÃO tenta openLink (abriria navegador)
+    console.log('[WebApp] Desktop: openTelegramLink unavailable, staying in WebApp');
+    return false;
   } else {
     // Web: fecha WebApp ao abrir link
     try {
