@@ -7966,8 +7966,12 @@ function haptic() {
 // Desktop (Windows/macOS/Linux): mantém WebApp aberto com openTelegramLink
 // Web (web/webview): fecha WebApp ao abrir link
 function abrirLinkTelegram(url) {
+  console.log('[WebApp] abrirLinkTelegram START:', url, 'isDesktop:', isDesktop);
   haptic();
-  if (!url) return false;
+  if (!url) {
+    console.log('[WebApp] abrirLinkTelegram: url is falsy!');
+    return false;
+  }
 
   // Converter tg:// para https:// se necessário
   let httpsUrl = url;
