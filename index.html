@@ -7967,6 +7967,8 @@ function haptic() {
 // Web (web/webview): fecha WebApp ao abrir link
 function abrirLinkTelegram(url) {
   console.log('[WebApp] abrirLinkTelegram START:', url, 'isDesktop:', isDesktop);
+  // Force log to persist
+  try { localStorage.setItem('debug_last_click', JSON.stringify({url, isDesktop, time: Date.now()})); } catch(e) {}
   haptic();
   if (!url) {
     console.log('[WebApp] abrirLinkTelegram: url is falsy!');
