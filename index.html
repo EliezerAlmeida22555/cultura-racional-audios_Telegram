@@ -860,7 +860,14 @@ const FAIXAS = {
   "OBRA - O19": [
     "01. Início19",
     "02. Atenção-nota",
-    "03. Degraus"
+    "03. Degraus",
+    "04. A Cultura Racional é consciente,positiva e superior e a cultura do animal Racional é a cultura",
+    "05. A fase de animal Racional foi um curso primário por ser uma fase inconsciente",
+    "06. A luta dos inconscientes dentro do curso primário que é a vida da matéria e por ser matéria é",
+    "07. A lapidação do animal Racional, por a vida da matéria ser um curso primário até alcançar o curso",
+    "08. O dever de fazer propaganda deste conhecimento",
+    "09. Cultura Racional, curso superior_ cultura do animal Racional, curso inferior e por assim ser,",
+    "10. A mudança das fases de acordo com a lapidação do animal Racional neste primarismo que é a vida"
   ],
   "OBRA - O16": [
     "01. Início16",
@@ -6102,8 +6109,8 @@ function haptic() {
 }
 
 // Método para abrir link no Telegram
-// Desktop: usa openLink com try_instant_view (mantém WebApp aberto, abre no navegador interno do Telegram Desktop)
-// Web: usa openLink (fecha WebApp, comportamento nativo)
+// Desktop: usa tg:// link nativo via openLink (mantém WebApp aberto, abre só no app nativo)
+// Web: usa openLink com https (fecha WebApp, comportamento nativo)
 function abrirLinkTelegram(url) {
   console.log('[WebApp] abrirLinkTelegram START:', url, 'isDesktop:', isDesktop);
   try { localStorage.setItem('debug_last_click', JSON.stringify({url, isDesktop, time: Date.now()})); } catch(e) {}
@@ -6113,39 +6120,43 @@ function abrirLinkTelegram(url) {
     return false;
   }
 
-  // Converter tg:// para https:// se necessário
-  let httpsUrl = url;
-  if (url.startsWith('tg://privatepost')) {
-    const m = url.match(/channel=(\d+)&post=(\d+)/);
-    if (m) httpsUrl = `https://t.me/c/${m[1]}/${m[2]}`;
+  // Converter para tg:// nativo (evita abrir Telegram Web no Desktop)
+  let tgUrl = url;
+  if (url.startsWith('https://t.me/c/')) {
+    const m = url.match(/https:\/\/t\.me\/c\/(\d+)\/(\d+)/);
+    if (m) tgUrl = `tg://privatepost?channel=${m[1]}&post=${m[2]}`;
+  } else if (url.startsWith('https://t.me/')) {
+    const m = url.match(/https:\/\/t\.me\/([^\/]+)\/(\d+)/);
+    if (m) tgUrl = `tg://resolve?domain=${m[1]}&post=${m[2]}`;
   }
 
-  console.log('[WebApp] abrirLinkTelegram:', httpsUrl, 'isDesktop:', isDesktop);
+  console.log('[WebApp] abrirLinkTelegram:', tgUrl, 'original:', url, 'isDesktop:', isDesktop);
 
   if (isDesktop) {
-    // Desktop: PRIMEIRO tenta openLink com try_instant_view (mantém WebApp aberto no navegador interno)
+    // Desktop: usa tg:// nativo via openLink (mantém WebApp aberto, só abre app nativo)
     try {
       if (tg && typeof tg.openLink === 'function') {
-        console.log('[WebApp] Desktop: openLink com try_instant_view=true (mantém WebApp aberto)');
-        tg.openLink(httpsUrl, { try_instant_view: true });
+        console.log('[WebApp] Desktop: openLink com tg:// nativo (mantém WebApp aberto)');
+        tg.openLink(tgUrl);
         return false;
       }
-    } catch(e) { console.log('[WebApp] openLink error:', e); }
+    } catch(e) { console.log('[WebApp] openLink tg:// error:', e); }
 
-    // Fallback: openTelegramLink (abre no app nativo, fecha WebApp)
+    // Fallback: openTelegramLink com tg://
     try {
       if (tg && typeof tg.openTelegramLink === 'function') {
-        console.log('[WebApp] Desktop: fallback openTelegramLink (abre app nativo, fecha WebApp)');
-        tg.openTelegramLink(httpsUrl);
+        console.log('[WebApp] Desktop: fallback openTelegramLink com tg://');
+        tg.openTelegramLink(tgUrl);
         return false;
       }
     } catch(e) { console.log('[WebApp] openTelegramLink error:', e); }
     return false;
   } else {
-    // Web: comportamento padrão (fecha WebApp)
+    // Web: usa https normal (fecha WebApp)
+    const httpsUrl = url.startsWith('tg://') ? url.replace('tg://privatepost?channel=', 'https://t.me/c/').replace('&post=', '/').replace('tg://resolve?domain=', 'https://t.me/').replace('&post=', '/') : url;
     try {
       if (tg && typeof tg.openLink === 'function') {
-        console.log('[WebApp] Web: usando openLink');
+        console.log('[WebApp] Web: usando openLink com https');
         tg.openLink(httpsUrl);
         return false;
       }
