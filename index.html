@@ -6080,8 +6080,9 @@ function haptic() {
 }
 
 // Método para abrir link no Telegram
-// Desktop (Windows/macOS/Linux): mantém WebApp aberto com openLink (HTTPS)
-// Web (web/webview): fecha WebApp ao abrir link
+// Desktop (Windows/macOS/Linux): TENTA openTelegramLink PRIMEIRO (abre app nativo Telegram Desktop)
+// Fallback: openLink (HTTPS) mantém WebApp aberto
+// Web (web/webview): usa openLink (fecha WebApp ao abrir link)
 function abrirLinkTelegram(url) {
   console.log('[WebApp] abrirLinkTelegram START:', url, 'isDesktop:', isDesktop);
   try { localStorage.setItem('debug_last_click', JSON.stringify({url, isDesktop, time: Date.now()})); } catch(e) {}
@@ -6101,18 +6102,26 @@ function abrirLinkTelegram(url) {
   console.log('[WebApp] abrirLinkTelegram:', httpsUrl, 'isDesktop:', isDesktop);
 
   if (isDesktop) {
-    // Desktop: mantém WebApp aberto - usa openLink com HTTPS
+    // 🎯 NOVO: Tentar abrir no Telegram Desktop NATIVO primeiro (openTelegramLink)
+    try {
+      if (tg && typeof tg.openTelegramLink === 'function') {
+        console.log('[WebApp] Desktop: abrindo no Telegram Desktop nativo via openTelegramLink');
+        tg.openTelegramLink(httpsUrl);
+        return false;
+      }
+    } catch(e) { console.log('[WebApp] openTelegramLink error:', e); }
+    
+    // Fallback: openLink com HTTPS (mantém WebApp aberto)
     try {
       if (tg && typeof tg.openLink === 'function') {
-        console.log('[WebApp] Desktop: using openLink (HTTPS)');
+        console.log('[WebApp] Desktop: fallback openLink (HTTPS)');
         tg.openLink(httpsUrl);
         return false;
       }
     } catch(e) { console.log('[WebApp] openLink error:', e); }
-    console.log('[WebApp] Desktop: openLink unavailable');
     return false;
   } else {
-    // Web: fecha WebApp ao abrir link
+    // Web: comportamento atual
     try {
       if (tg && typeof tg.openLink === 'function') {
         console.log('[WebApp] Web: using openLink');
