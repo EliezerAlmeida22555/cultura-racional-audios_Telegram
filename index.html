@@ -585,9 +585,32 @@
   "RÉPLICA - R04": 22586,
   "RÉPLICA - R05": 22604,
   "RÉPLICA - R06": 22628,
-  "RÉPLICA - R07": 22648
+  "RÉPLICA - R07": 22648,
+  "RÉPLICA - R08": 22670
 };
     const FAIXAS = {
+  "RÉPLICA - R07": [
+    "01. Introdução e A luta dos inconscientes nunca que podia endireitar....",
+    "02. As mudanças régias o natural da Natureza...",
+    "03. Como é feito o contato doa Habitantes....",
+    "04. Por não conhecer a base e a lógica verdadeira....",
+    "05. Sem o mapa e a planta do mundo, ninguém podia acertar",
+    "06. O mapa, a planta e a bússola Racional nas mãos de toda a humanidade",
+    "07. Grande multidão dos Habitantes do MUNDO RACIONAL...",
+    "08. Como é feita a Imunização do corpo humano...",
+    "09. A evolução natural da Natureza...",
+    "10. A mudança de um corpo de matéria....",
+    "11. O socorro dos Habitantes do MUNDO RACIONAL...1a PARTE",
+    "12. O socorro dos Habitantes do MUNDO RACIONAL....-FINAL",
+    "13. Uma instrução sobre a vida da matéria",
+    "14. Agora o triunfo é RACIONAL",
+    "15. A rainha matéria, o que ela é e o que ela se propõe....",
+    "16. A FASE RACIONAL, natural da Natureza,.....",
+    "17. A eterna vigilância do verdadeiro DEUS sobre a humanidade",
+    "18. O fim dessa civilização....",
+    "19. A mudança da fase do curso primário....",
+    "20. O progesso da matéria bruta...."
+  ],
   "RÉPLICA - R04": [
     "01. O princípio da degeneração....A hierarquia da degeneração",
     "02. O julgamento da vida em confusão, A matéria é um ser em transmutação",
@@ -1085,20 +1108,6 @@
     "17. O dever de fazer propaganda deste conhecimento",
     "18. Apoteose"
   ],
-  "RÉPLICA - R07": [
-    "01. Introdução e A luta dos inconscientes nunca que podia endireitar....",
-    "02. As mudanças régias o natural da Natureza...",
-    "03. Como é feito o contato doa Habitantes....",
-    "04. Por não conhecer a base e a lógica verdadeira....",
-    "05. Sem o mapa e a planta do mundo, ninguém podia acertar",
-    "06. O mapa, a planta e a bússola Racional nas mãos de toda a humanidade",
-    "07. Grande multidão dos Habitantes do MUNDO RACIONAL...",
-    "08. Como é feita a Imunização do corpo humano...",
-    "09. A evolução natural da Natureza...",
-    "10. A mudança de um corpo de matéria....",
-    "11. O socorro dos Habitantes do MUNDO RACIONAL...1a PARTE",
-    "12. O socorro dos Habitantes do MUNDO RACIONAL....-FINAL"
-  ],
   "OBRA - O15": [
     "01. Início15",
     "02. Atenção-nota",
@@ -1183,6 +1192,14 @@
     "18. Ontem era Brasil, animal inconsciente, hoje Brasil, Racional consciente",
     "19. A inconsciência nunca pôde descobrir o verdadeiro certo",
     "20. O amadurecimento da fase do animal Racional, daí a liquidação e a transformação para o estado"
+  ],
+  "RÉPLICA - R08": [
+    "01. Introdução e Fizeram da matéria DEUS....",
+    "02. A inconsciência sempre foia causa das confusões....",
+    "03. Da civilização extinta.....",
+    "04. A Cultura da salvação do animal racional....",
+    "05. O alfabeto artficial, seu princípio....",
+    "06. O encontro de tu com o tu mesmo...."
   ],
   "OBRA - O16": [
     "01. Início16",
@@ -5908,20 +5925,6 @@
     "86 - PAZ INTERIOR",
     "87 - ROSA DE DEUS"
   ],
-  "RÉPLICA - R08": [
-    "01. Introdução e Fizeram da matéria DEUS....",
-    "02. A inconsciência sempre foia causa das confusões....",
-    "03. Da civilização extinta.....",
-    "04. A Cultura da salvação do animal racional....",
-    "05. O alfabeto artficial, seu princípio....",
-    "06. O encontro de tu com o tu mesmo....",
-    "07. DEUS, de seu mendo, abriu as portas....",
-    "08. Os Habitantes do MUNDO RACIONAL....",
-    "09. O destino da humanidade....",
-    "10. Estamos na FASE RACIONAL....",
-    "11. O estado maior do universo.....",
-    "12. Um comentário do destino certo e do destino errado que tomaram"
-  ],
   "RÉPLICA - R09": [
     "01. Introdução e Orientações básicas....",
     "02. A consciência artificial não tem base....",
@@ -6972,29 +6975,34 @@
     montarBotoesColecoes();
   </script>
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      // Intercepta todos os cliques no documento
+    (function () {
+      // Escuta cliques antes de qualquer outro script da página ou do navegador
       document.addEventListener("click", function (e) {
-        // Verifica se o elemento clicado é um link do Telegram
-        const anchor = e.target.closest('a[href*="t.me/c/"]');
-        if (anchor) {
-          // 1. Impede o navegador de abrir a aba t.me na web
+        // Procura o elemento <a> mais próximo do elemento clicado
+        const anchor = e.target.closest('a');
+        if (!anchor) return;
+
+        const href = anchor.getAttribute('href') || anchor.href;
+
+        // Verifica se o link é do tipo privado do Telegram (t.me/c/...)
+        if (href && href.includes('t.me/c/')) {
+          // 1. Bloqueia ABERTURA DE NOVA ABA e navegação padrão do navegador
           e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
 
-          // 2. Extrai o ID do canal e o ID do post
-          const href = anchor.getAttribute('href');
+          // 2. Extrai ID do canal e ID do post
           const match = href.match(/t\.me\/c\/(\d+)\/(\d+)/);
-
           if (match) {
             const channelId = match[1];
             const postId = match[2];
 
-            // 3. Redireciona exclusivamente para o Telegram Desktop
+            // 3. Redireciona EXCLUSIVAMENTE para o Telegram Desktop
             window.location.href = `tg://privatepost?channel=${channelId}&post=${postId}`;
           }
         }
-      });
-    });
+      }, true); // O argumento 'true' ativa o modo de CAPTURA PRIORITÁRIA
+    })();
   </script>
 </body>
 
