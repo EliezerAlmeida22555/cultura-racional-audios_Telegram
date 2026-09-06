@@ -1,425 +1,563 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-  :root {
-    --bg-primary: #0f172a;
-    --bg-card: #1e293b;
-    --bg-input: #334155;
-    --accent: #38bdf8;
-    --accent-hover: #0284c7;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --border-color: #334155;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-card: #1e293b;
+      --bg-input: #334155;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --border-color: #334155;
+    }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
 
-  body {
-    background-color: var(--tg-theme-bg-color, var(--bg-primary));
-    color: var(--tg-theme-text-color, var(--text-primary));
-    min-height: 100vh;
-    padding: 16px;
-    padding-bottom: 30px;
-    -webkit-font-smoothing: antialiased;
-  }
+    body {
+      background-color: var(--tg-theme-bg-color, var(--bg-primary));
+      color: var(--tg-theme-text-color, var(--text-primary));
+      min-height: 100vh;
+      padding: 16px;
+      padding-bottom: 30px;
+      -webkit-font-smoothing: antialiased;
+    }
 
-  .header { text-align: center; margin-bottom: 16px; }
-  .header-icon { font-size: 2.2em; margin-bottom: 4px; display: block; }
-  h1 { font-size: 1.3em; font-weight: 700; color: var(--tg-theme-text-color, #fff); }
-  .subtitle { font-size: 0.85em; color: var(--tg-theme-hint-color, var(--text-secondary)); margin-top: 2px; }
+    .header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
 
-  /* 4 Botões Principais de Navegação */
-  .nav-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .nav-btn {
-    background: var(--tg-theme-secondary-bg-color, var(--bg-card));
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 12px 8px;
-    color: var(--tg-theme-text-color, #fff);
-    font-size: 0.88em;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  .nav-btn:active { transform: scale(0.97); }
+    .header-icon {
+      font-size: 2.2em;
+      margin-bottom: 4px;
+      display: block;
+    }
 
-  /* Campo de Busca */
-  .search-box {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  input[type="text"], input[type="number"] {
-    padding: 12px 14px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    background: var(--tg-theme-secondary-bg-color, var(--bg-input));
-    color: var(--tg-theme-text-color, #fff);
-    font-size: 1em;
-    outline: none;
-  }
-  input[type="text"] { flex: 1; }
-  input::placeholder { color: var(--tg-theme-hint-color, var(--text-secondary)); }
-  
-  .search-btn {
-    padding: 12px 18px;
-    border-radius: 12px;
-    border: none;
-    background: var(--tg-theme-button-color, var(--accent));
-    color: var(--tg-theme-button-text-color, #fff);
-    font-size: 1.1em;
-    cursor: pointer;
-    font-weight: bold;
-  }
+    h1 {
+      font-size: 1.3em;
+      font-weight: 700;
+      color: var(--tg-theme-text-color, #fff);
+    }
 
-  /* Grid de Coleções */
-  .colecoes-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .col-card {
-    padding: 14px 10px;
-    border-radius: 14px;
-    border: none;
-    font-size: 0.9em;
-    font-weight: 700;
-    cursor: pointer;
-    text-align: center;
-    color: #fff;
-    line-height: 1.3;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-    transition: transform 0.15s ease;
-  }
-  .col-card:active { transform: scale(0.96); }
-  .col-span2 { grid-column: span 2; }
+    .subtitle {
+      font-size: 0.85em;
+      color: var(--tg-theme-hint-color, var(--text-secondary));
+      margin-top: 2px;
+    }
 
-  .col-AMARELÕES  { background: linear-gradient(135deg, #FFD700, #B8860B); color: #1a1000; }
-  .col-OBRA       { background: linear-gradient(135deg, #56CCF2, #2D9CDB); color: #fff; }
-  .col-RÉPLICA    { background: linear-gradient(135deg, #27AE60, #1E8449); color: #fff; }
-  .col-TRÉPLICA   { background: linear-gradient(135deg, #2B4EBF, #1A3498); color: #fff; }
-  .col-HISTÓRICO  { background: linear-gradient(135deg, #009C3B, #006B29); color: #fff; }
-  .col-MUSICAS    { background: linear-gradient(135deg, #ffffff, #e2e8f0); color: #0f172a; }
-  .col-default    { background: linear-gradient(135deg, #475569, #334155); color: #fff; }
+    /* 4 Botões Principais de Navegação */
+    .nav-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
 
-  /* Seção de Conteúdo e Resultados */
-  .card-box {
-    background: var(--tg-theme-secondary-bg-color, var(--bg-card));
-    border: 1px solid var(--border-color);
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 16px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  }
-  .card-title { font-size: 1.05em; font-weight: 700; margin-bottom: 8px; color: var(--tg-theme-text-color, #fff); }
-  .card-desc { font-size: 0.9em; color: var(--tg-theme-hint-color, var(--text-secondary)); line-height: 1.4; margin-bottom: 12px; }
+    .nav-btn {
+      background: var(--tg-theme-secondary-bg-color, var(--bg-card));
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 8px;
+      color: var(--tg-theme-text-color, #fff);
+      font-size: 0.88em;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-  /* Badge de Marcador Salvo na busca */
-  .saved-badge {
-    background: rgba(34, 197, 94, 0.15);
-    border: 1px solid #22c55e;
-    border-radius: 10px;
-    padding: 10px 12px;
-    margin-top: 10px;
-    font-size: 0.85em;
-    color: #4ade80;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-  }
-  .badge-actions { display: flex; gap: 6px; align-items: center; }
+    .nav-btn:active {
+      transform: scale(0.97);
+    }
 
-  /* Itens de Volume */
-  .vol-item {
-    background: var(--tg-theme-bg-color, var(--bg-primary));
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 12px 14px;
-    margin-bottom: 12px;
-    display: block;
-    text-decoration: none;
-    color: var(--tg-theme-text-color, #fff);
-  }
-  .vol-header { display: flex; justify-content: space-between; align-items: center; }
-  .vol-title { font-weight: 700; font-size: 0.98em; }
-  .vol-btn-link {
-    display: inline-block;
-    margin-top: 8px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    background: var(--tg-theme-button-color, var(--accent));
-    color: var(--tg-theme-button-text-color, #fff);
-    font-size: 0.88em;
-    font-weight: 700;
-    text-decoration: none;
-    text-align: center;
-    width: 100%;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    cursor: pointer;
-  }
+    /* Campo de Busca */
+    .search-box {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
 
-  /* Seletor de Faixas Universal */
-  .faixas-marks {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 10px;
-    padding-top: 8px;
-    border-top: 1px dashed var(--border-color);
-  }
-  .mark-chip {
-    background: var(--bg-input);
-    color: var(--text-secondary);
-    border: none;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 0.78em;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .mark-chip.active {
-    background: #22c55e !important;
-    color: #fff !important;
-    font-weight: bold;
-    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
-  }
+    input[type="text"],
+    input[type="number"] {
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: var(--tg-theme-secondary-bg-color, var(--bg-input));
+      color: var(--tg-theme-text-color, #fff);
+      font-size: 1em;
+      outline: none;
+    }
 
-  /* Lista de Faixas Expansível */
-  .expand-tracks-btn {
-    width: 100%;
-    margin-top: 10px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    color: var(--accent);
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 0.82em;
-    font-weight: 700;
-    cursor: pointer;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-  .expand-tracks-btn:active { transform: scale(0.98); }
+    input[type="text"] {
+      flex: 1;
+    }
 
-  .tracks-list-container {
-    margin-top: 10px;
-    padding: 10px;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-height: 280px;
-    overflow-y: auto;
-  }
-  .track-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 10px;
-    background: var(--bg-card);
-    border-radius: 6px;
-    font-size: 0.82em;
-  }
-  .track-name { font-weight: 600; color: #fff; }
-  .track-btns { display: flex; gap: 6px; }
+    input::placeholder {
+      color: var(--tg-theme-hint-color, var(--text-secondary));
+    }
 
-  .track-play-btn {
-    background: #22c55e;
-    color: #fff;
-    text-decoration: none;
-    padding: 4px 8px;
-    border-radius: 5px;
-    font-weight: bold;
-    font-size: 0.8em;
-    cursor: pointer;
-  }
-  .track-play-btn.playing {
-    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
-    color: #fff !important;
-    animation: pulsePlaying 1.5s infinite alternate;
-  }
-  @keyframes pulsePlaying {
-    0% { box-shadow: 0 0 4px rgba(2, 132, 199, 0.4); transform: scale(1); }
-    100% { box-shadow: 0 0 10px rgba(2, 132, 199, 0.9); transform: scale(1.03); }
-  }
-  .track-mark-btn {
-    background: var(--bg-input);
-    color: var(--text-secondary);
-    border: none;
-    padding: 4px 8px;
-    border-radius: 5px;
-    font-weight: bold;
-    font-size: 0.8em;
-    cursor: pointer;
-  }
-  .track-mark-btn.active {
-    background: #eab308 !important;
-    color: #000 !important;
-  }
+    .search-btn {
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: none;
+      background: var(--tg-theme-button-color, var(--accent));
+      color: var(--tg-theme-button-text-color, #fff);
+      font-size: 1.1em;
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-  /* Stepper de Controle Livre de Faixas */
-  .stepper-box {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 8px;
-    width: 100%;
-  }
-  .step-btn {
-    background: var(--bg-input);
-    color: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    width: 34px;
-    height: 34px;
-    font-size: 1.1em;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .faixa-num-input {
-    width: 60px;
-    text-align: center;
-    padding: 6px !important;
-    font-size: 0.9em !important;
-  }
-  .salvar-chip-btn {
-    flex: 1;
-    background: #22c55e;
-    color: #fff;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.82em;
-    font-weight: bold;
-    cursor: pointer;
-  }
+    /* Grid de Coleções */
+    .colecoes-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
 
-  .del-btn-sm {
-    background: #ef4444;
-    color: #fff;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 0.75em;
-    cursor: pointer;
-    font-weight: 600;
-  }
+    .col-card {
+      padding: 14px 10px;
+      border-radius: 14px;
+      border: none;
+      font-size: 0.9em;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      color: #fff;
+      line-height: 1.3;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+      transition: transform 0.15s ease;
+    }
 
-  .pagination {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    margin-top: 14px;
-  }
-  .page-btn {
-    padding: 8px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background: var(--bg-card);
-    color: #fff;
-    font-size: 0.85em;
-    cursor: pointer;
-  }
+    .col-card:active {
+      transform: scale(0.96);
+    }
 
-  .voltar-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    margin-bottom: 12px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    background: var(--bg-input);
-    color: var(--text-primary);
-    font-size: 0.85em;
-    cursor: pointer;
-    border: none;
-  }
+    .col-span2 {
+      grid-column: span 2;
+    }
 
-  .ctrl-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-top: 12px;
-  }
-  .ctrl-btn {
-    background: var(--bg-input);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    padding: 10px 6px;
-    border-radius: 8px;
-    font-size: 0.82em;
-    font-weight: 600;
-    cursor: pointer;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-  }
-  .ctrl-btn:active { transform: scale(0.96); }
+    .col-AMARELÕES {
+      background: linear-gradient(135deg, #FFD700, #B8860B);
+      color: #1a1000;
+    }
 
-  .empty { text-align: center; color: var(--tg-theme-hint-color, var(--text-secondary)); padding: 24px 0; font-size: 0.9em; }
-</style>
+    .col-OBRA {
+      background: linear-gradient(135deg, #56CCF2, #2D9CDB);
+      color: #fff;
+    }
+
+    .col-RÉPLICA {
+      background: linear-gradient(135deg, #27AE60, #1E8449);
+      color: #fff;
+    }
+
+    .col-TRÉPLICA {
+      background: linear-gradient(135deg, #2B4EBF, #1A3498);
+      color: #fff;
+    }
+
+    .col-HISTÓRICO {
+      background: linear-gradient(135deg, #009C3B, #006B29);
+      color: #fff;
+    }
+
+    .col-MUSICAS {
+      background: linear-gradient(135deg, #ffffff, #e2e8f0);
+      color: #0f172a;
+    }
+
+    .col-default {
+      background: linear-gradient(135deg, #475569, #334155);
+      color: #fff;
+    }
+
+    /* Seção de Conteúdo e Resultados */
+    .card-box {
+      background: var(--tg-theme-secondary-bg-color, var(--bg-card));
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-title {
+      font-size: 1.05em;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--tg-theme-text-color, #fff);
+    }
+
+    .card-desc {
+      font-size: 0.9em;
+      color: var(--tg-theme-hint-color, var(--text-secondary));
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    /* Badge de Marcador Salvo na busca */
+    .saved-badge {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid #22c55e;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: 10px;
+      font-size: 0.85em;
+      color: #4ade80;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .badge-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    /* Itens de Volume */
+    .vol-item {
+      background: var(--tg-theme-bg-color, var(--bg-primary));
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      display: block;
+      text-decoration: none;
+      color: var(--tg-theme-text-color, #fff);
+    }
+
+    .vol-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .vol-title {
+      font-weight: 700;
+      font-size: 0.98em;
+    }
+
+    .vol-btn-link {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--tg-theme-button-color, var(--accent));
+      color: var(--tg-theme-button-text-color, #fff);
+      font-size: 0.88em;
+      font-weight: 700;
+      text-decoration: none;
+      text-align: center;
+      width: 100%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+    }
+
+    /* Seletor de Faixas Universal */
+    .faixas-marks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    .mark-chip {
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.78em;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .mark-chip.active {
+      background: #22c55e !important;
+      color: #fff !important;
+      font-weight: bold;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+    }
+
+    /* Lista de Faixas Expansível */
+    .expand-tracks-btn {
+      width: 100%;
+      margin-top: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--accent);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.82em;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .expand-tracks-btn:active {
+      transform: scale(0.98);
+    }
+
+    .tracks-list-container {
+      margin-top: 10px;
+      padding: 10px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .track-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      background: var(--bg-card);
+      border-radius: 6px;
+      font-size: 0.82em;
+    }
+
+    .track-name {
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .track-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .track-play-btn {
+      background: #22c55e;
+      color: #fff;
+      text-decoration: none;
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 0.8em;
+      cursor: pointer;
+    }
+
+    .track-play-btn.playing {
+      background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+      color: #fff !important;
+      animation: pulsePlaying 1.5s infinite alternate;
+    }
+
+    @keyframes pulsePlaying {
+      0% {
+        box-shadow: 0 0 4px rgba(2, 132, 199, 0.4);
+        transform: scale(1);
+      }
+
+      100% {
+        box-shadow: 0 0 10px rgba(2, 132, 199, 0.9);
+        transform: scale(1.03);
+      }
+    }
+
+    .track-mark-btn {
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      border: none;
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 0.8em;
+      cursor: pointer;
+    }
+
+    .track-mark-btn.active {
+      background: #eab308 !important;
+      color: #000 !important;
+    }
+
+    /* Stepper de Controle Livre de Faixas */
+    .stepper-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      width: 100%;
+    }
+
+    .step-btn {
+      background: var(--bg-input);
+      color: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      width: 34px;
+      height: 34px;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .faixa-num-input {
+      width: 60px;
+      text-align: center;
+      padding: 6px !important;
+      font-size: 0.9em !important;
+    }
+
+    .salvar-chip-btn {
+      flex: 1;
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.82em;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .del-btn-sm {
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75em;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .pagination {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 14px;
+    }
+
+    .page-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: #fff;
+      font-size: 0.85em;
+      cursor: pointer;
+    }
+
+    .voltar-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 12px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 0.85em;
+      cursor: pointer;
+      border: none;
+    }
+
+    .ctrl-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .ctrl-btn {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 10px 6px;
+      border-radius: 8px;
+      font-size: 0.82em;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .ctrl-btn:active {
+      transform: scale(0.96);
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--tg-theme-hint-color, var(--text-secondary));
+      padding: 24px 0;
+      font-size: 0.9em;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="header">
-  <span class="header-icon">🎧</span>
-  <h1>CULTURA RACIONAL</h1>
-  <p class="subtitle">Navegador & Marcador de Áudios</p>
-  <span style="font-size:0.75em; background:rgba(56, 189, 248, 0.2); color:#38bdf8; border:1px solid #38bdf8; padding:2px 8px; border-radius:10px; margin-top:6px; display:inline-block;">⚡ v6.0 — CORREÇÃO FAIXA EXATA & INTEGRAÇÃO NATIVA</span>
-</div>
+  <div class="header">
+    <span class="header-icon">🎧</span>
+    <h1>CULTURA RACIONAL</h1>
+    <p class="subtitle">Navegador & Marcador de Áudios</p>
+    <span
+      style="font-size:0.75em; background:rgba(56, 189, 248, 0.2); color:#38bdf8; border:1px solid #38bdf8; padding:2px 8px; border-radius:10px; margin-top:6px; display:inline-block;">⚡
+      v6.0 — CORREÇÃO FAIXA EXATA & INTEGRAÇÃO NATIVA</span>
+  </div>
 
-<!-- 4 Botões Principais de Navegação -->
-<div class="nav-grid">
-  <button class="nav-btn" onclick="focarBusca()">🔍 BUSCAR VOLUME</button>
-  <button class="nav-btn" onclick="mostrarOndeParei()">📍 ONDE PAREI?</button>
-  <button class="nav-btn" onclick="resetarParaColecoes()">📚 VER COLEÇÕES</button>
-  <button class="nav-btn" onclick="sortearAudioDia()">🎲 ÁUDIO DO DIA</button>
-</div>
+  <!-- 4 Botões Principais de Navegação -->
+  <div class="nav-grid">
+    <button class="nav-btn" onclick="focarBusca()">🔍 BUSCAR VOLUME</button>
+    <button class="nav-btn" onclick="mostrarOndeParei()">📍 ONDE PAREI?</button>
+    <button class="nav-btn" onclick="resetarParaColecoes()">📚 VER COLEÇÕES</button>
+    <button class="nav-btn" onclick="sortearAudioDia()">🎲 ÁUDIO DO DIA</button>
+  </div>
 
-<!-- Campo de Busca -->
-<div class="search-box">
-  <input type="text" id="search" placeholder="Digite número ou código (ex: A01, O15, H050)..." />
-  <button class="search-btn" onclick="executarBusca()">🔍</button>
-</div>
+  <!-- Campo de Busca -->
+  <div class="search-box">
+    <input type="text" id="search" placeholder="Digite número ou código (ex: A01, O15, H050)..." />
+    <button class="search-btn" onclick="executarBusca()">🔍</button>
+  </div>
 
-<!-- Container Principal Dinâmico -->
-<div id="content-container">
-  <div class="colecoes-grid" id="colecoes-grid"></div>
-</div>
+  <!-- Container Principal Dinâmico -->
+  <div id="content-container">
+    <div class="colecoes-grid" id="colecoes-grid"></div>
+  </div>
 
-<script>
-const GROUP_LINK = 'https://t.me/c/4415417039/';
-const TOPICOS = {
+  <script>
+    const GROUP_LINK = 'https://t.me/c/4415417039/';
+    const TOPICOS = {
   "OBRA - O18": 21990,
   "OBRA - O01": 22008,
   "OBRA - O02": 22075,
@@ -440,9 +578,32 @@ const TOPICOS = {
   "OBRA - O17": 22408,
   "OBRA - O19": 22479,
   "OBRA - O20": 22501,
-  "OBRA - O21": 22520
+  "OBRA - O21": 22520,
+  "RÉPLICA - R01": 22545,
+  "RÉPLICA - R02": 22557,
+  "RÉPLICA - R03": 22574,
+  "RÉPLICA - R04": 22586,
+  "RÉPLICA - R05": 22604
 };
-const FAIXAS = {
+    const FAIXAS = {
+  "RÉPLICA - R04": [
+    "01. O princípio da degeneração....A hierarquia da degeneração",
+    "02. O julgamento da vida em confusão, A matéria é um ser em transmutação",
+    "03. O encontro com o positivo real, A matéria é um progresso degenerativo, O espaço está repleto de Habitantes...",
+    "04. A ligação dos dois mundos...,O animal racional por ser animal....",
+    "05. A matéria só foi boa...",
+    "06. Um comentário de um progresso....",
+    "07. As mudanças são as causas do enfraquecimento....",
+    "08. Os grilhões da matéria....Ninguém vagando mais como uma nau sem rumo",
+    "09. Mudando a ligação.... A ligação da energia certa....",
+    "10. A Clarividência racional....",
+    "11. A evolução da hierarquia das classes inferiores",
+    "12. A matéria é uma enfermidade, Como a humanidade pode se ligar a DEUS",
+    "13. Um comentário Racional da vida das ilusões da matéria",
+    "14. A Supremacia Racional é a vida verdadeira....",
+    "15. De que maneira é necessário fazer....",
+    "16. O som da vida desafinada....A absolvição da condenação à morte...."
+  ],
   "OBRA - O01": [
     "01. Início",
     "02. Atenção-Nota",
@@ -708,6 +869,27 @@ const FAIXAS = {
     "15. Apoteose",
     "16. O dever de fazer propaganda deste conhecimento"
   ],
+  "RÉPLICA - R05": [
+    "01. Introdução e A formação Racional do corpo humano",
+    "02. O vínculo de origem do ser humano",
+    "03. O desequilíbrio da humanidade, por viver de sonhos e ilusões",
+    "04. A esperança de todos realizada da forma real Racional-a vinda de quem já esperavam há muito",
+    "05. Como eliminar as doenças e conservar a saúde da humanidade",
+    "06. A serventia da flora medicinal e vegetal pra que foi feita",
+    "07. Uma exposição dos fatos ocorridos no mundo, feita pelo verdadeiro DEUS, a razão e os motivos dos males da humanidade",
+    "08. A justificação do verdadeiro DEUS - o RACIONAL SUPERIOR",
+    "09. Continuação da justificação do verdadeiro DEUS - o RACIONAL SUPERIOR",
+    "10. Na vida da matéria, tudo tinha que falhar, por a matéria ser falha",
+    "11. Como seria o fim de nossa civilização.Extenmínio completo de uma civilização",
+    "12. Como seria o fim da humanidade",
+    "13. DEUS esclarece, prova e comprova, que não é responsável pelo sofrimnto da humanidade e quem foram os responsáveis",
+    "14. Os sonhos da vida",
+    "15. Uma exposição da vida da matéria e os Habitantes do Mundo Racional, como estrelas no firmamento",
+    "16. O rosário da vida dos escravos da matéria- a Sinhá absoluta que fazia dos cativos o que entendia- o domínio era a matéria",
+    "17. A ligação positiva e a ligação negativa- os efeitos da negativa e os efeitos da positiva- o rosário dos transes do passado",
+    "18. Na origem, que é Raciona, estáo os poderes dos poderes e que de lá a soluçãode tudo e de todos e do mundo e da vida",
+    "19. A grande chance da humanidade de ter contacto com o verdadeiro DEUS"
+  ],
   "OBRA - O13": [
     "01. Início13",
     "02. Atenção-nota",
@@ -727,6 +909,18 @@ const FAIXAS = {
     "16. A classificação de Aparelho Racional",
     "17. Todos dentro do Mundo Racional",
     "18. Para a satisfação dos mais exigentes pesquisadores"
+  ],
+  "RÉPLICA - R01": [
+    "01. UNIVERSO EM DESENCANTO",
+    "02. Int até Como o ser humano é regido....",
+    "03. Agora a humanidade... Os criadores dos Deuses",
+    "04. O encontro da humanidade... -Os crisantemos -Como podemos vencer os prelúdios da vida",
+    "05. Atenção",
+    "06. A identidade do Verdadeiro DEUS",
+    "07. Qual é a força mais poderosa...-De onde provém...-Onde nasceu...",
+    "08. Qual foi a... -Quem é o Racional Superior da Terra",
+    "09. Hierarquia Racional",
+    "10. Fala o Tribunal Racional aos indignos"
   ],
   "OBRA - O11": [
     "01. Início11",
@@ -774,6 +968,18 @@ const FAIXAS = {
     "24. O bem físico, moral e financeiro, nos fluidos está a força mais poderosa do mundo",
     "25. Quem é o Racional Superior",
     "26. O melhor passeio e a melhor distração é na estrada racional, caminhando para o nosso mundo de"
+  ],
+  "RÉPLICA - R03": [
+    "01. Int e A degeneração-fator natural da Natureza...",
+    "02. A degeneração do espiritismo, Os sonhos do encanto, No encanto tudo....O espelho do mundo....",
+    "03. Como volta à origem...Onde abriu a Porta Racional, Como se pode....,A origem é Racional",
+    "04. Na Planta Racional....A Planta é o mapa perfeito...O que é Umbanda, Continuação do que é Umbanda,",
+    "05. As mudanças naturais da evolução da Natureza",
+    "06. A Natureza confusa....O bom senso....A Constelação Universal",
+    "07. Todos são diferentes nessa deformação racional",
+    "08. A fórmula unificada Racional",
+    "09. Os transmissores do Mundo Racional, Como nasceu o espiritismo na Terra",
+    "10. Continuação de como nasceu.... Por que os espíritos.....O excesso do liver arbítrio"
   ],
   "OBRA - O14": [
     "01. Início14",
@@ -875,6 +1081,23 @@ const FAIXAS = {
     "18. Definida a situação do mundo e a situação de todos",
     "19. Procuraram o certo e encontraram o certo",
     "20. Chegou ao mundo a fase Racional, uma das mudanças da naturaza, porque a fase de animal Raciona"
+  ],
+  "RÉPLICA - R02": [
+    "01. UNIVERSO EM DESENCANTO",
+    "02. Introdução, A mudança Divina....",
+    "03. A ilusão dos materialistas...A reza da morte...",
+    "04. Os entendimentos da Natureza...O engenheiro chefe da deformação é o Sol",
+    "05. Qual foi o maior....",
+    "06. Quem fez esse mundo assim",
+    "07. Alfabeto Astrológico",
+    "08. Os crimes cometidos....",
+    "09. As fantasias ludibriadoras....",
+    "10. Os abusos do livre-arbítrio...",
+    "11. O pricípio da formação do ser humano",
+    "12. Por que és um animal racional, Continuação da formação....",
+    "13. Aí está a Imunização Racional...Quem vive dentro do fogo...",
+    "14. A causa e a razão do sofrimento",
+    "15. A vibração racional...A matéria surgiu do nada....Ninguém tem culpa....A humanidade e tudo nasceu do chão, O pricípio e o fim da humanidade"
   ],
   "OBRA - O08": [
     "01. Início8",
@@ -5646,89 +5869,6 @@ const FAIXAS = {
     "86 - PAZ INTERIOR",
     "87 - ROSA DE DEUS"
   ],
-  "RÉPLICA - R01": [
-    "01. UNIVERSO EM DESENCANTO",
-    "02. Int até Como o ser humano é regido....",
-    "03. Agora a humanidade... Os criadores dos Deuses",
-    "04. O encontro da humanidade... -Os crisantemos -Como podemos vencer os prelúdios da vida",
-    "05. Atenção",
-    "06. A identidade do Verdadeiro DEUS",
-    "07. Qual é a força mais poderosa...-De onde provém...-Onde nasceu...",
-    "08. Qual foi a... -Quem é o Racional Superior da Terra",
-    "09. Hierarquia Racional",
-    "10. Fala o Tribunal Racional aos indignos"
-  ],
-  "RÉPLICA - R02": [
-    "01. UNIVERSO EM DESENCANTO",
-    "02. Introdução, A mudança Divina....",
-    "03. A ilusão dos materialistas...A reza da morte...",
-    "04. Os entendimentos da Natureza...O engenheiro chefe da deformação é o Sol",
-    "05. Qual foi o maior....",
-    "06. Quem fez esse mundo assim",
-    "07. Alfabeto Astrológico",
-    "08. Os crimes cometidos....",
-    "09. As fantasias ludibriadoras....",
-    "10. Os abusos do livre-arbítrio...",
-    "11. O pricípio da formação do ser humano",
-    "12. Por que és um animal racional, Continuação da formação....",
-    "13. Aí está a Imunização Racional...Quem vive dentro do fogo...",
-    "14. A causa e a razão do sofrimento",
-    "15. A vibração racional...A matéria surgiu do nada....Ninguém tem culpa....A humanidade e tudo nasceu do chão, O pricípio e o fim da humanidade"
-  ],
-  "RÉPLICA - R03": [
-    "01. Int e A degeneração-fator natural da Natureza...",
-    "02. A degeneração do espiritismo, Os sonhos do encanto, No encanto tudo....O espelho do mundo....",
-    "03. Como volta à origem...Onde abriu a Porta Racional, Como se pode....,A origem é Racional",
-    "04. Na Planta Racional....A Planta é o mapa perfeito...O que é Umbanda, Continuação do que é Umbanda,",
-    "05. As mudanças naturais da evolução da Natureza",
-    "06. A Natureza confusa....O bom senso....A Constelação Universal",
-    "07. Todos são diferentes nessa deformação racional",
-    "08. A fórmula unificada Racional",
-    "09. Os transmissores do Mundo Racional, Como nasceu o espiritismo na Terra",
-    "10. Continuação de como nasceu.... Por que os espíritos.....O excesso do liver arbítrio"
-  ],
-  "RÉPLICA - R04": [
-    "01. O princípio da degeneração....A hierarquia da degeneração",
-    "02. O julgamento da vida em confusão, A matéria é um ser em transmutação",
-    "03. O encontro com o positivo real, A matéria é um progresso degenerativo, O espaço está repleto de Habitantes...",
-    "04. A ligação dos dois mundos...,O animal racional por ser animal....",
-    "05. A matéria só foi boa...",
-    "06. Um comentário de um progresso....",
-    "07. As mudanças são as causas do enfraquecimento....",
-    "08. Os grilhões da matéria....Ninguém vagando mais como uma nau sem rumo",
-    "09. Mudando a ligação.... A ligação da energia certa....",
-    "10. A Clarividência racional....",
-    "11. A evolução da hierarquia das classes inferiores",
-    "12. A matéria é uma enfermidade, Como a humanidade pode se ligar a DEUS",
-    "13. Um comentário Racional da vida das ilusões da matéria",
-    "14. A Supremacia Racional é a vida verdadeira....",
-    "15. De que maneira é necessário fazer....",
-    "16. O som da vida desafinada....A absolvição da condenação à morte...."
-  ],
-  "RÉPLICA - R05": [
-    "01. Introdução e A formação Racional do corpo humano",
-    "02. O vínculo de origem do ser humano",
-    "03. O desequilíbrio da humanidade, por viver de sonhos e ilusões",
-    "04. A esperança de todos realizada da forma real Racional-a vinda de quem já esperavam há muito",
-    "05. Como eliminar as doenças e conservar a saúde da humanidade",
-    "06. A serventia da flora medicinal e vegetal pra que foi feita",
-    "07. Uma exposição dos fatos ocorridos no mundo, feita pelo verdadeiro DEUS, a razão e os motivos dos males da humanidade",
-    "08. A justificação do verdadeiro DEUS - o RACIONAL SUPERIOR",
-    "09. Continuação da justificação do verdadeiro DEUS - o RACIONAL SUPERIOR",
-    "10. Na vida da matéria, tudo tinha que falhar, por a matéria ser falha",
-    "11. Como seria o fim de nossa civilização.Extenmínio completo de uma civilização",
-    "12. Como seria o fim da humanidade",
-    "13. DEUS esclarece, prova e comprova, que não é responsável pelo sofrimnto da humanidade e quem foram os responsáveis",
-    "14. Os sonhos da vida",
-    "15. Uma exposição da vida da matéria e os Habitantes do Mundo Racional, como estrelas no firmamento",
-    "16. O rosário da vida dos escravos da matéria- a Sinhá absoluta que fazia dos cativos o que entendia- o domínio era a matéria",
-    "17. A ligação positiva e a ligação negativa- os efeitos da negativa e os efeitos da positiva- o rosário dos transes do passado",
-    "18. Na origem, que é Raciona, estáo os poderes dos poderes e que de lá a soluçãode tudo e de todos e do mundo e da vida",
-    "19. A grande chance da humanidade de ter contacto com o verdadeiro DEUS",
-    "20. Escolha o seu destino- A volta será ao MUNDO RACIONAL ou a descida unido ao irracional. Sim, o bom acaba bem e o mal acaba mal.Quem procede bem,acaba bem e quem procede mal, acaba mal",
-    "21. Ninguém é culpado do sofrimento de ninguém, porque todos sofrem.A mudança do alfabeto é a causade todo sofrimento da humanidade......",
-    "22. Quando é feita a fraternidade, paz e amor Racionalmente e a Concórdia Universal, porque ninguém é culpado do sofrimento de ninguém, porque todos sofrem"
-  ],
   "RÉPLICA - R06": [
     "01. Introdução e Não existem duas verdades,a verdade é uma só-é RACIONAL-a verdade slavae a mentira em liquidação, virando cinza",
     "02. Os efeitos da mudança do verdadeiro alfabeto para o alfabeto artificial da matéria.E este, conduziria para o extermínio dessa civilização",
@@ -6048,8 +6188,8 @@ const FAIXAS = {
     "03. Houve o desenvolvimento material....."
   ]
 };
-// Mapa com o ID real da mensagem da Faixa 1 de cada volume (calculado automaticamente)
-const FAIXA1_IDS = {
+    // Mapa com o ID real da mensagem da Faixa 1 de cada volume (calculado automaticamente)
+    const FAIXA1_IDS = {
   "OBRA - O06": 22169,
   "OBRA - O02": 22076,
   "OBRA - O01": 22009,
@@ -6073,389 +6213,389 @@ const FAIXA1_IDS = {
   "OBRA - O19": 22480
 };
 
-function obterListaFaixas(volNome) {
-  if (FAIXAS && FAIXAS[volNome] && FAIXAS[volNome].length) return FAIXAS[volNome];
-  const n = norm(volNome);
-  if (FAIXAS) {
-    for (const [k, v] of Object.entries(FAIXAS)) {
-      if (norm(k) === n && v && v.length) return v;
-    }
-  }
-  return null;
-}
-
-const EMOJIS = {
-  'AMARELÕES': '🟡', 'OBRA': '🟢', 'RÉPLICA': '🔴',
-  'TRÉPLICA': '🔵', 'HISTÓRICO': '🟣', 'MUSICAS': '🎵'
-};
-const EMOJI_PADRAO = '📁';
-
-const tg = window.Telegram && window.Telegram.WebApp;
-const isDesktop = tg && ['windows', 'macos', 'linux', 'unknown'].includes(tg.platform);
-if (tg) {
-  try {
-    tg.ready();
-    tg.expand();
-  } catch(e) {}
-  // Debug: log platform
-  console.log('[WebApp] platform:', tg.platform, 'isDesktop:', isDesktop, 'openTelegramLink:', typeof tg.openTelegramLink);
-}
-
-function norm(s) {
-  return (s || '').toLowerCase().normalize('NFC').trim();
-}
-
-function extrairNum(s) {
-  const m = String(s).match(/\d+/);
-  return m ? parseInt(m[0]) : 999999;
-}
-
-function cssClass(nome) {
-  const known = ['AMARELÕES','OBRA','RÉPLICA','TRÉPLICA','HISTÓRICO','MUSICAS'];
-  return known.includes(nome.toUpperCase()) ? `col-${nome.toUpperCase()}` : 'col-default';
-}
-
-function haptic() {
-  try {
-    if (tg && tg.HapticFeedback) {
-      tg.HapticFeedback.impactOccurred('light');
-    }
-  } catch(e) {}
-}
-
-// Método para abrir link no Telegram
-// Desktop: usa openLink com https (mantém WebApp aberto, abre no navegador interno do Telegram Desktop)
-// Web: usa openLink com https (fecha WebApp, comportamento nativo)
-function abrirLinkTelegram(url) {
-  console.log('[WebApp] abrirLinkTelegram START:', url, 'isDesktop:', isDesktop);
-  try { localStorage.setItem('debug_last_click', JSON.stringify({url, isDesktop, time: Date.now()})); } catch(e) {}
-  haptic();
-  if (!url) {
-    console.log('[WebApp] abrirLinkTelegram: url is falsy!');
-    return false;
-  }
-
-  // Garantir que é https:// (openLink não aceita tg://)
-  let httpsUrl = url;
-  if (url.startsWith('tg://privatepost')) {
-    const m = url.match(/channel=(\d+)&post=(\d+)/);
-    if (m) httpsUrl = `https://t.me/c/${m[1]}/${m[2]}`;
-  } else if (url.startsWith('tg://resolve')) {
-    const m = url.match(/domain=([^&]+)&post=(\d+)/);
-    if (m) httpsUrl = `https://t.me/${m[1]}/${m[2]}`;
-  }
-
-  console.log('[WebApp] abrirLinkTelegram:', httpsUrl, 'isDesktop:', isDesktop);
-
-  if (isDesktop) {
-    // Desktop: PRIMEIRO tenta openLink com try_instant_view (mantém WebApp aberto no navegador interno)
-    try {
-      if (tg && typeof tg.openLink === 'function') {
-        console.log('[WebApp] Desktop: openLink com try_instant_view=true (mantém WebApp aberto)');
-        tg.openLink(httpsUrl, { try_instant_view: true });
-        return false;
-      }
-    } catch(e) { console.log('[WebApp] openLink error:', e); }
-
-    // Fallback: openLink simples
-    try {
-      if (tg && typeof tg.openLink === 'function') {
-        console.log('[WebApp] Desktop: fallback openLink simples');
-        tg.openLink(httpsUrl);
-        return false;
-      }
-    } catch(e) { console.log('[WebApp] openLink error:', e); }
-    return false;
-  } else {
-    // Web: comportamento padrão (fecha WebApp)
-    try {
-      if (tg && typeof tg.openLink === 'function') {
-        console.log('[WebApp] Web: usando openLink');
-        tg.openLink(httpsUrl);
-        return false;
-      }
-    } catch(e) { console.log('[WebApp] Web openLink error:', e); }
-    try {
-      console.log('[WebApp] Web: usando window.open');
-      window.open(httpsUrl, '_blank');
-      return false;
-    } catch(e) { console.log('[WebApp] Web window.open error:', e); }
-  }
-
-  return false;
-}
-
-function isSingleTopicCollection(volNome) {
-  if (!volNome) return false;
-  return !volNome.includes(' - ');
-}
-
-function obterThreadId(volNome) {
-  if (!volNome) return null;
-  if (TOPICOS[volNome]) return TOPICOS[volNome];
-  const n = norm(volNome);
-  for (const [k, v] of Object.entries(TOPICOS)) {
-    if (norm(k) === n) return v;
-  }
-  return null;
-}
-
-// Gera o link para o Tópico e a Faixa F no Telegram
-// Retorna objeto: { url, exato: boolean, threadId, msgId }
-function obterLinkFaixa(volNome, faixaNum = 1) {
-  const threadId = obterThreadId(volNome);
-  if (!threadId) return { url: 'https://t.me/c/4415417039', exato: false, threadId: null, msgId: null };
-  
-  const f = Math.max(1, parseInt(faixaNum) || 1);
-  const faixa1Id = (typeof FAIXA1_IDS !== 'undefined' && FAIXA1_IDS) ? FAIXA1_IDS[volNome] : null;
-  
-  if (faixa1Id) {
-    // faixa1Id é o ID do título do tópico. Primeiro áudio = faixa1Id + 1
-    // Faixa f = faixa1Id + f
-    const msgId = parseInt(faixa1Id) + f;
-    console.log('[WebApp] obterLinkFaixa:', volNome, 'faixaNum:', faixaNum, 'f:', f, 'faixa1Id:', faixa1Id, 'msgId:', msgId);
-    return { url: `https://t.me/c/4415417039/${msgId}`, exato: true, threadId, msgId };
-  } else {
-    // Sem offset detectado: link genérico do tópico (abre no tópico, usuário navega)
-    return { url: `https://t.me/c/4415417039/${threadId}`, exato: false, threadId, msgId: null };
-  }
-}
-
-// Verifica se o volume tem offset de faixa1 detectado
-function temOffsetDetectado(volNome) {
-  const faixa1Id = (typeof FAIXA1_IDS !== 'undefined' && FAIXA1_IDS) ? FAIXA1_IDS[volNome] : null;
-  return !!faixa1Id;
-}
-
-const expandedVolumesSet = new Set();
-
-function toggleFaixasVolume(cleanId, count) {
-  haptic();
-  const el = document.getElementById('tracks-list-' + cleanId);
-  const btn = document.getElementById('btn-expand-' + cleanId);
-  if (!el) return;
-  const labelCount = count ? count + ' faixas' : 'faixas';
-  if (el.style.display === 'none' || !el.style.display) {
-    el.style.display = 'flex';
-    expandedVolumesSet.add(cleanId);
-    if (btn) btn.innerHTML = '🎵 Ocultar Lista de Faixas 🔼';
-  } else {
-    el.style.display = 'none';
-    expandedVolumesSet.delete(cleanId);
-    if (btn) btn.innerHTML = `🎵 Ver Lista de Faixas (${labelCount}) 🔽`;
-  }
-}
-
-// --- GERENCIADOR MULTI-MARCADORES (LOCALSTORAGE + TELEGRAM CLOUDSTORAGE) ---
-function obterMarcadores() {
-  try {
-    const raw = localStorage.getItem('cr_marcadores_dict');
-    if (raw) return JSON.parse(raw);
-    
-    // Migração do formato antigo de marcador único
-    const antigo = localStorage.getItem('cr_marcador_escuta');
-    if (antigo) {
-      const p = JSON.parse(antigo);
-      if (p && p.volume) {
-        const dict = {};
-        dict[p.volume] = { faixa: parseInt(p.faixa) || 1, data: p.data || new Date().toLocaleDateString('pt-BR') };
-        salvarMarcadoresDict(dict);
-        return dict;
-      }
-    }
-  } catch(e) {}
-  return {};
-}
-
-function salvarMarcadoresDict(dict) {
-  try {
-    localStorage.setItem('cr_marcadores_dict', JSON.stringify(dict));
-  } catch(e) {}
-  try {
-    if (tg && tg.CloudStorage && typeof tg.CloudStorage.setItem === 'function') {
-      tg.CloudStorage.setItem('cr_marcadores_dict', JSON.stringify(dict), function() {});
-    }
-  } catch(e) {}
-  haptic();
-}
-
-function carregarCloudStorage(callback) {
-  try {
-    if (tg && tg.CloudStorage && typeof tg.CloudStorage.getItem === 'function') {
-      tg.CloudStorage.getItem('cr_marcadores_dict', function(err, val) {
-        if (!err && val) {
-          try {
-            localStorage.setItem('cr_marcadores_dict', val);
-          } catch(e) {}
+    function obterListaFaixas(volNome) {
+      if (FAIXAS && FAIXAS[volNome] && FAIXAS[volNome].length) return FAIXAS[volNome];
+      const n = norm(volNome);
+      if (FAIXAS) {
+        for (const [k, v] of Object.entries(FAIXAS)) {
+          if (norm(k) === n && v && v.length) return v;
         }
-        if (callback) callback();
-      });
-      return;
+      }
+      return null;
     }
-  } catch(e) {}
-  if (callback) callback();
-}
 
-function esc(s) {
-  return String(s || '').replace(/'/g, "\\'");
-}
+    const EMOJIS = {
+      'AMARELÕES': '🟡', 'OBRA': '🟢', 'RÉPLICA': '🔴',
+      'TRÉPLICA': '🔵', 'HISTÓRICO': '🟣', 'MUSICAS': '🎵'
+    };
+    const EMOJI_PADRAO = '📁';
 
-function salvarMarcador(volNome, faixaNum) {
-  haptic();
-  const dict = obterMarcadores();
-  const fNum = Math.max(1, parseInt(faixaNum) || 1);
-  dict[volNome] = {
-    faixa: fNum,
-    tocando: false,
-    data: new Date().toLocaleDateString('pt-BR')
-  };
-  salvarMarcadoresDict(dict);
-  atualizarTelaSemFecharListas();
-}
+    const tg = window.Telegram && window.Telegram.WebApp;
+    const isDesktop = tg && ['windows', 'macos', 'linux', 'unknown'].includes(tg.platform);
+    if (tg) {
+      try {
+        tg.ready();
+        tg.expand();
+      } catch (e) { }
+      // Debug: log platform
+      console.log('[WebApp] platform:', tg.platform, 'isDesktop:', isDesktop, 'openTelegramLink:', typeof tg.openTelegramLink);
+    }
 
-function tocarFaixa(volNome, faixaNum) {
-  haptic();
-  const fNum = Math.max(1, parseInt(faixaNum) || 1);
-  const dict = obterMarcadores();
-  const mAtual = dict[volNome];
-  
-  // Alterna entre Tocando e Parado ao clicar no mesmo botão
-  if (mAtual && parseInt(mAtual.faixa) === fNum && mAtual.tocando) {
-    dict[volNome].tocando = false;
-    salvarMarcadoresDict(dict);
-    atualizarTelaSemFecharListas();
-    return;
-  }
-  
-  dict[volNome] = {
-    faixa: fNum,
-    tocando: true,
-    data: new Date().toLocaleDateString('pt-BR')
-  };
-  salvarMarcadoresDict(dict);
-  
-  const linkF = obterLinkFaixa(volNome, fNum);
-  abrirLinkTelegram(linkF.url);
-  
-  atualizarTelaSemFecharListas();
-}
+    function norm(s) {
+      return (s || '').toLowerCase().normalize('NFC').trim();
+    }
 
-function atualizarTelaSemFecharListas() {
-  if (document.getElementById('marcador-card-container')) {
-    mostrarOndeParei();
-  } else if (window.currentLista) {
-    renderizarResultados(window.currentLista, window.currentTitulo || 'Resultados', window.currentPagina || 1);
-  }
-}
+    function extrairNum(s) {
+      const m = String(s).match(/\d+/);
+      return m ? parseInt(m[0]) : 999999;
+    }
 
-function alterarInputFaixa(inputId, delta) {
-  const inp = document.getElementById(inputId);
-  if (!inp) return;
-  let val = (parseInt(inp.value) || 1) + delta;
-  if (val < 1) val = 1;
-  inp.value = val;
-}
+    function cssClass(nome) {
+      const known = ['AMARELÕES', 'OBRA', 'RÉPLICA', 'TRÉPLICA', 'HISTÓRICO', 'MUSICAS'];
+      return known.includes(nome.toUpperCase()) ? `col-${nome.toUpperCase()}` : 'col-default';
+    }
 
-function salvarFaixaDoInput(volNome, inputId) {
-  const inp = document.getElementById(inputId);
-  if (!inp) return;
-  const num = parseInt(inp.value) || 1;
-  salvarMarcador(volNome, num);
-}
+    function haptic() {
+      try {
+        if (tg && tg.HapticFeedback) {
+          tg.HapticFeedback.impactOccurred('light');
+        }
+      } catch (e) { }
+    }
 
-function removerMarcador(volNome) {
-  haptic();
-  const dict = obterMarcadores();
-  delete dict[volNome];
-  salvarMarcadoresDict(dict);
-  
-  if (document.getElementById('marcador-card-container')) {
-    mostrarOndeParei();
-  } else if (window.currentLista) {
-    renderizarResultados(window.currentLista, window.currentTitulo || 'Resultados', window.currentPagina || 1);
-  }
-}
+    // Método para abrir link no Telegram
+    // Desktop: usa openLink com https (mantém WebApp aberto, abre no navegador interno do Telegram Desktop)
+    // Web: usa openLink com https (fecha WebApp, comportamento nativo)
+    function abrirLinkTelegram(url) {
+      console.log('[WebApp] abrirLinkTelegram START:', url, 'isDesktop:', isDesktop);
+      try { localStorage.setItem('debug_last_click', JSON.stringify({ url, isDesktop, time: Date.now() })); } catch (e) { }
+      haptic();
+      if (!url) {
+        console.log('[WebApp] abrirLinkTelegram: url is falsy!');
+        return false;
+      }
 
-function limparTodosMarcadores() {
-  haptic();
-  if (confirm('Tem certeza que deseja apagar TODOS os seus pontos de escuta salvos?')) {
-    salvarMarcadoresDict({});
-    mostrarOndeParei();
-  }
-}
+      // Garantir que é https:// (openLink não aceita tg://)
+      let httpsUrl = url;
+      if (url.startsWith('tg://privatepost')) {
+        const m = url.match(/channel=(\d+)&post=(\d+)/);
+        if (m) httpsUrl = `https://t.me/c/${m[1]}/${m[2]}`;
+      } else if (url.startsWith('tg://resolve')) {
+        const m = url.match(/domain=([^&]+)&post=(\d+)/);
+        if (m) httpsUrl = `https://t.me/${m[1]}/${m[2]}`;
+      }
 
-function faixaAnteriorParaVolume(volNome) {
-  const dict = obterMarcadores();
-  const m = dict[volNome];
-  if (!m) return;
-  const atual = parseInt(m.faixa) || 1;
-  if (atual > 1) {
-    dict[volNome].faixa = atual - 1;
-    salvarMarcadoresDict(dict);
-    mostrarOndeParei();
-  } else {
-    alert('Você já está na Faixa 1 deste volume.');
-  }
-}
+      console.log('[WebApp] abrirLinkTelegram:', httpsUrl, 'isDesktop:', isDesktop);
 
-function avancarFaixaParaVolume(volNome) {
-  const dict = obterMarcadores();
-  const m = dict[volNome];
-  if (!m) return;
-  const atual = parseInt(m.faixa) || 1;
-  dict[volNome].faixa = atual + 1;
-  salvarMarcadoresDict(dict);
-  mostrarOndeParei();
-}
+      if (isDesktop) {
+        // Desktop: PRIMEIRO tenta openLink com try_instant_view (mantém WebApp aberto no navegador interno)
+        try {
+          if (tg && typeof tg.openLink === 'function') {
+            console.log('[WebApp] Desktop: openLink com try_instant_view=true (mantém WebApp aberto)');
+            tg.openLink(httpsUrl, { try_instant_view: true });
+            return false;
+          }
+        } catch (e) { console.log('[WebApp] openLink error:', e); }
 
-function volumeAnteriorParaVolume(volNome) {
-  const dict = obterMarcadores();
-  const chaves = Object.keys(TOPICOS);
-  const idxAtual = chaves.findIndex(k => norm(k) === norm(volNome));
-  if (idxAtual > 0) {
-    const prevVol = chaves[idxAtual - 1];
-    const fAnterior = dict[volNome] ? dict[volNome].faixa : 1;
-    dict[prevVol] = { faixa: fAnterior, data: new Date().toLocaleDateString('pt-BR') };
-    salvarMarcadoresDict(dict);
-    mostrarOndeParei();
-  } else {
-    alert('Você já está no primeiro volume disponível.');
-  }
-}
+        // Fallback: openLink simples
+        try {
+          if (tg && typeof tg.openLink === 'function') {
+            console.log('[WebApp] Desktop: fallback openLink simples');
+            tg.openLink(httpsUrl);
+            return false;
+          }
+        } catch (e) { console.log('[WebApp] openLink error:', e); }
+        return false;
+      } else {
+        // Web: comportamento padrão (fecha WebApp)
+        try {
+          if (tg && typeof tg.openLink === 'function') {
+            console.log('[WebApp] Web: usando openLink');
+            tg.openLink(httpsUrl);
+            return false;
+          }
+        } catch (e) { console.log('[WebApp] Web openLink error:', e); }
+        try {
+          console.log('[WebApp] Web: usando window.open');
+          window.open(httpsUrl, '_blank');
+          return false;
+        } catch (e) { console.log('[WebApp] Web window.open error:', e); }
+      }
 
-function proximoVolumeParaVolume(volNome) {
-  const dict = obterMarcadores();
-  const chaves = Object.keys(TOPICOS);
-  const idxAtual = chaves.findIndex(k => norm(k) === norm(volNome));
-  if (idxAtual !== -1 && idxAtual + 1 < chaves.length) {
-    const proxVol = chaves[idxAtual + 1];
-    const fAtual = dict[volNome] ? dict[volNome].faixa : 1;
-    dict[proxVol] = { faixa: fAtual, data: new Date().toLocaleDateString('pt-BR') };
-    salvarMarcadoresDict(dict);
-    mostrarOndeParei();
-  } else {
-    alert('Você já está no último volume disponível!');
-  }
-}
+      return false;
+    }
 
-// --- EXIBIÇÃO DA TELA "ONDE PAREI?" ---
-function renderizarOndePareiView() {
-  const dict = obterMarcadores();
-  const entradas = Object.entries(dict);
-  const container = document.getElementById('content-container');
-  
-  if (!entradas.length) {
-    container.innerHTML = `
+    function isSingleTopicCollection(volNome) {
+      if (!volNome) return false;
+      return !volNome.includes(' - ');
+    }
+
+    function obterThreadId(volNome) {
+      if (!volNome) return null;
+      if (TOPICOS[volNome]) return TOPICOS[volNome];
+      const n = norm(volNome);
+      for (const [k, v] of Object.entries(TOPICOS)) {
+        if (norm(k) === n) return v;
+      }
+      return null;
+    }
+
+    // Gera o link para o Tópico e a Faixa F no Telegram
+    // Retorna objeto: { url, exato: boolean, threadId, msgId }
+    function obterLinkFaixa(volNome, faixaNum = 1) {
+      const threadId = obterThreadId(volNome);
+      if (!threadId) return { url: 'https://t.me/c/4415417039', exato: false, threadId: null, msgId: null };
+
+      const f = Math.max(1, parseInt(faixaNum) || 1);
+      const faixa1Id = (typeof FAIXA1_IDS !== 'undefined' && FAIXA1_IDS) ? FAIXA1_IDS[volNome] : null;
+
+      if (faixa1Id) {
+        // faixa1Id é o ID do título do tópico. Primeiro áudio = faixa1Id + 1
+        // Faixa f = faixa1Id + f
+        const msgId = parseInt(faixa1Id) + f;
+        console.log('[WebApp] obterLinkFaixa:', volNome, 'faixaNum:', faixaNum, 'f:', f, 'faixa1Id:', faixa1Id, 'msgId:', msgId);
+        return { url: `https://t.me/c/4415417039/${msgId}`, exato: true, threadId, msgId };
+      } else {
+        // Sem offset detectado: link genérico do tópico (abre no tópico, usuário navega)
+        return { url: `https://t.me/c/4415417039/${threadId}`, exato: false, threadId, msgId: null };
+      }
+    }
+
+    // Verifica se o volume tem offset de faixa1 detectado
+    function temOffsetDetectado(volNome) {
+      const faixa1Id = (typeof FAIXA1_IDS !== 'undefined' && FAIXA1_IDS) ? FAIXA1_IDS[volNome] : null;
+      return !!faixa1Id;
+    }
+
+    const expandedVolumesSet = new Set();
+
+    function toggleFaixasVolume(cleanId, count) {
+      haptic();
+      const el = document.getElementById('tracks-list-' + cleanId);
+      const btn = document.getElementById('btn-expand-' + cleanId);
+      if (!el) return;
+      const labelCount = count ? count + ' faixas' : 'faixas';
+      if (el.style.display === 'none' || !el.style.display) {
+        el.style.display = 'flex';
+        expandedVolumesSet.add(cleanId);
+        if (btn) btn.innerHTML = '🎵 Ocultar Lista de Faixas 🔼';
+      } else {
+        el.style.display = 'none';
+        expandedVolumesSet.delete(cleanId);
+        if (btn) btn.innerHTML = `🎵 Ver Lista de Faixas (${labelCount}) 🔽`;
+      }
+    }
+
+    // --- GERENCIADOR MULTI-MARCADORES (LOCALSTORAGE + TELEGRAM CLOUDSTORAGE) ---
+    function obterMarcadores() {
+      try {
+        const raw = localStorage.getItem('cr_marcadores_dict');
+        if (raw) return JSON.parse(raw);
+
+        // Migração do formato antigo de marcador único
+        const antigo = localStorage.getItem('cr_marcador_escuta');
+        if (antigo) {
+          const p = JSON.parse(antigo);
+          if (p && p.volume) {
+            const dict = {};
+            dict[p.volume] = { faixa: parseInt(p.faixa) || 1, data: p.data || new Date().toLocaleDateString('pt-BR') };
+            salvarMarcadoresDict(dict);
+            return dict;
+          }
+        }
+      } catch (e) { }
+      return {};
+    }
+
+    function salvarMarcadoresDict(dict) {
+      try {
+        localStorage.setItem('cr_marcadores_dict', JSON.stringify(dict));
+      } catch (e) { }
+      try {
+        if (tg && tg.CloudStorage && typeof tg.CloudStorage.setItem === 'function') {
+          tg.CloudStorage.setItem('cr_marcadores_dict', JSON.stringify(dict), function () { });
+        }
+      } catch (e) { }
+      haptic();
+    }
+
+    function carregarCloudStorage(callback) {
+      try {
+        if (tg && tg.CloudStorage && typeof tg.CloudStorage.getItem === 'function') {
+          tg.CloudStorage.getItem('cr_marcadores_dict', function (err, val) {
+            if (!err && val) {
+              try {
+                localStorage.setItem('cr_marcadores_dict', val);
+              } catch (e) { }
+            }
+            if (callback) callback();
+          });
+          return;
+        }
+      } catch (e) { }
+      if (callback) callback();
+    }
+
+    function esc(s) {
+      return String(s || '').replace(/'/g, "\\'");
+    }
+
+    function salvarMarcador(volNome, faixaNum) {
+      haptic();
+      const dict = obterMarcadores();
+      const fNum = Math.max(1, parseInt(faixaNum) || 1);
+      dict[volNome] = {
+        faixa: fNum,
+        tocando: false,
+        data: new Date().toLocaleDateString('pt-BR')
+      };
+      salvarMarcadoresDict(dict);
+      atualizarTelaSemFecharListas();
+    }
+
+    function tocarFaixa(volNome, faixaNum) {
+      haptic();
+      const fNum = Math.max(1, parseInt(faixaNum) || 1);
+      const dict = obterMarcadores();
+      const mAtual = dict[volNome];
+
+      // Alterna entre Tocando e Parado ao clicar no mesmo botão
+      if (mAtual && parseInt(mAtual.faixa) === fNum && mAtual.tocando) {
+        dict[volNome].tocando = false;
+        salvarMarcadoresDict(dict);
+        atualizarTelaSemFecharListas();
+        return;
+      }
+
+      dict[volNome] = {
+        faixa: fNum,
+        tocando: true,
+        data: new Date().toLocaleDateString('pt-BR')
+      };
+      salvarMarcadoresDict(dict);
+
+      const linkF = obterLinkFaixa(volNome, fNum);
+      abrirLinkTelegram(linkF.url);
+
+      atualizarTelaSemFecharListas();
+    }
+
+    function atualizarTelaSemFecharListas() {
+      if (document.getElementById('marcador-card-container')) {
+        mostrarOndeParei();
+      } else if (window.currentLista) {
+        renderizarResultados(window.currentLista, window.currentTitulo || 'Resultados', window.currentPagina || 1);
+      }
+    }
+
+    function alterarInputFaixa(inputId, delta) {
+      const inp = document.getElementById(inputId);
+      if (!inp) return;
+      let val = (parseInt(inp.value) || 1) + delta;
+      if (val < 1) val = 1;
+      inp.value = val;
+    }
+
+    function salvarFaixaDoInput(volNome, inputId) {
+      const inp = document.getElementById(inputId);
+      if (!inp) return;
+      const num = parseInt(inp.value) || 1;
+      salvarMarcador(volNome, num);
+    }
+
+    function removerMarcador(volNome) {
+      haptic();
+      const dict = obterMarcadores();
+      delete dict[volNome];
+      salvarMarcadoresDict(dict);
+
+      if (document.getElementById('marcador-card-container')) {
+        mostrarOndeParei();
+      } else if (window.currentLista) {
+        renderizarResultados(window.currentLista, window.currentTitulo || 'Resultados', window.currentPagina || 1);
+      }
+    }
+
+    function limparTodosMarcadores() {
+      haptic();
+      if (confirm('Tem certeza que deseja apagar TODOS os seus pontos de escuta salvos?')) {
+        salvarMarcadoresDict({});
+        mostrarOndeParei();
+      }
+    }
+
+    function faixaAnteriorParaVolume(volNome) {
+      const dict = obterMarcadores();
+      const m = dict[volNome];
+      if (!m) return;
+      const atual = parseInt(m.faixa) || 1;
+      if (atual > 1) {
+        dict[volNome].faixa = atual - 1;
+        salvarMarcadoresDict(dict);
+        mostrarOndeParei();
+      } else {
+        alert('Você já está na Faixa 1 deste volume.');
+      }
+    }
+
+    function avancarFaixaParaVolume(volNome) {
+      const dict = obterMarcadores();
+      const m = dict[volNome];
+      if (!m) return;
+      const atual = parseInt(m.faixa) || 1;
+      dict[volNome].faixa = atual + 1;
+      salvarMarcadoresDict(dict);
+      mostrarOndeParei();
+    }
+
+    function volumeAnteriorParaVolume(volNome) {
+      const dict = obterMarcadores();
+      const chaves = Object.keys(TOPICOS);
+      const idxAtual = chaves.findIndex(k => norm(k) === norm(volNome));
+      if (idxAtual > 0) {
+        const prevVol = chaves[idxAtual - 1];
+        const fAnterior = dict[volNome] ? dict[volNome].faixa : 1;
+        dict[prevVol] = { faixa: fAnterior, data: new Date().toLocaleDateString('pt-BR') };
+        salvarMarcadoresDict(dict);
+        mostrarOndeParei();
+      } else {
+        alert('Você já está no primeiro volume disponível.');
+      }
+    }
+
+    function proximoVolumeParaVolume(volNome) {
+      const dict = obterMarcadores();
+      const chaves = Object.keys(TOPICOS);
+      const idxAtual = chaves.findIndex(k => norm(k) === norm(volNome));
+      if (idxAtual !== -1 && idxAtual + 1 < chaves.length) {
+        const proxVol = chaves[idxAtual + 1];
+        const fAtual = dict[volNome] ? dict[volNome].faixa : 1;
+        dict[proxVol] = { faixa: fAtual, data: new Date().toLocaleDateString('pt-BR') };
+        salvarMarcadoresDict(dict);
+        mostrarOndeParei();
+      } else {
+        alert('Você já está no último volume disponível!');
+      }
+    }
+
+    // --- EXIBIÇÃO DA TELA "ONDE PAREI?" ---
+    function renderizarOndePareiView() {
+      const dict = obterMarcadores();
+      const entradas = Object.entries(dict);
+      const container = document.getElementById('content-container');
+
+      if (!entradas.length) {
+        container.innerHTML = `
       <div class="card-box" id="marcador-card-container">
         <div class="card-title">📍 SEUS PONTOS DE ESCUTA</div>
         <div class="card-desc">Você ainda não marcou nenhum ponto de escuta.<br><br>Quando estiver pesquisando ou ouvindo um volume, escolha o número da faixa e clique em <b>📌 Salvar Faixa</b>!</div>
         <button class="voltar-btn" onclick="resetarParaColecoes()">← Voltar às Coleções</button>
       </div>
     `;
-    return;
-  }
+        return;
+      }
 
-  let html = `
+      let html = `
     <div id="marcador-card-container">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <button class="voltar-btn" style="margin-bottom:0;" onclick="resetarParaColecoes()">← Voltar às Coleções</button>
@@ -6466,21 +6606,21 @@ function renderizarOndePareiView() {
       </div>
   `;
 
-  entradas.forEach(([volNome, info]) => {
-    const faixaAtual = parseInt(info.faixa) || 1;
-    const linkFaixa = obterLinkFaixa(volNome, faixaAtual);
-    const isSingle = isSingleTopicCollection(volNome);
-    const cleanId = norm(volNome).replace(/[^a-z0-9]/g, '');
+      entradas.forEach(([volNome, info]) => {
+        const faixaAtual = parseInt(info.faixa) || 1;
+        const linkFaixa = obterLinkFaixa(volNome, faixaAtual);
+        const isSingle = isSingleTopicCollection(volNome);
+        const cleanId = norm(volNome).replace(/[^a-z0-9]/g, '');
 
-    const listaF = obterListaFaixas(volNome);
-    const countF = listaF ? listaF.length : 15;
-    const eVol = esc(volNome);
+        const listaF = obterListaFaixas(volNome);
+        const countF = listaF ? listaF.length : 15;
+        const eVol = esc(volNome);
 
-    const isExpanded = expandedVolumesSet.has('card-' + cleanId);
-    const displayStyle = isExpanded ? 'display:flex;' : 'display:none;';
-    const btnText = isExpanded ? '🎵 Ocultar Lista de Faixas 🔼' : `🎵 Ver Lista de Faixas (${countF} faixas) 🔽`;
+        const isExpanded = expandedVolumesSet.has('card-' + cleanId);
+        const displayStyle = isExpanded ? 'display:flex;' : 'display:none;';
+        const btnText = isExpanded ? '🎵 Ocultar Lista de Faixas 🔼' : `🎵 Ver Lista de Faixas (${countF} faixas) 🔽`;
 
-    html += `
+        html += `
       <div class="card-box" style="margin-bottom:14px;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
           <div class="card-title">📖 ${volNome}</div>
@@ -6522,13 +6662,13 @@ function renderizarOndePareiView() {
         <!-- Lista Expansível de Faixas de Áudio com nomes reais -->
         <div id="tracks-list-card-${cleanId}" class="tracks-list-container" style="${displayStyle}">
           ${(listaF || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).map((itemF, idx) => {
-            const f = idx + 1;
-            const tituloF = typeof itemF === 'string' ? itemF : ('Faixa ' + f);
-            const isFTocando = (faixaAtual === f && info.tocando !== false);
-            const isFSelected = (faixaAtual === f);
-            const playBtnText = isFTocando ? '🔊 Tocando...' : '▶️ Tocar';
-            const playBtnClass = isFTocando ? 'track-play-btn playing' : 'track-play-btn';
-            return `
+          const f = idx + 1;
+          const tituloF = typeof itemF === 'string' ? itemF : ('Faixa ' + f);
+          const isFTocando = (faixaAtual === f && info.tocando !== false);
+          const isFSelected = (faixaAtual === f);
+          const playBtnText = isFTocando ? '🔊 Tocando...' : '▶️ Tocar';
+          const playBtnClass = isFTocando ? 'track-play-btn playing' : 'track-play-btn';
+          return `
               <div class="track-row">
                 <span class="track-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%; font-size:0.82em;" title="${tituloF}">🎵 ${tituloF}</span>
                 <div class="track-btns">
@@ -6537,34 +6677,34 @@ function renderizarOndePareiView() {
                 </div>
               </div>
             `;
-          }).join('')}
+        }).join('')}
         </div>
       </div>
     `;
-  });
+      });
 
-  html += `</div>`;
-  container.innerHTML = html;
-}
+      html += `</div>`;
+      container.innerHTML = html;
+    }
 
-function mostrarOndeParei() {
-  haptic();
-  carregarCloudStorage(function() {
-    renderizarOndePareiView();
-  });
-}
+    function mostrarOndeParei() {
+      haptic();
+      carregarCloudStorage(function () {
+        renderizarOndePareiView();
+      });
+    }
 
-// --- ÁUDIO / VOLUME DO DIA ---
-function sortearAudioDia() {
-  haptic();
-  const chaves = Object.keys(TOPICOS);
-  if (!chaves.length) return;
-  
-  const sorteado = chaves[Math.floor(Math.random() * chaves.length)];
-  const linkAudio1 = obterLinkFaixa(sorteado, 1);
+    // --- ÁUDIO / VOLUME DO DIA ---
+    function sortearAudioDia() {
+      haptic();
+      const chaves = Object.keys(TOPICOS);
+      if (!chaves.length) return;
 
-  const container = document.getElementById('content-container');
-  container.innerHTML = `
+      const sorteado = chaves[Math.floor(Math.random() * chaves.length)];
+      const linkAudio1 = obterLinkFaixa(sorteado, 1);
+
+      const container = document.getElementById('content-container');
+      container.innerHTML = `
     <div class="card-box">
       <div class="card-title">🎲 SUGESTÃO DE ESCUTA DO DIA</div>
       <div class="card-desc">
@@ -6580,62 +6720,62 @@ function sortearAudioDia() {
       </div>
     </div>
   `;
-}
-
-// --- BUSCA EXATA E INTELIGENTE ---
-function buscarVolumes(termo) {
-  const t = norm(termo).replace(/\s/g, '');
-  const mCod = t.match(/^([a-z]+)(\d+)$/);
-  let colEstrita = null, numEstrito = null;
-
-  if (mCod) {
-    const PREFIXOS = { a: 'AMARELÕES', o: 'OBRA', r: 'RÉPLICA', t: 'TRÉPLICA', h: 'HISTÓRICO', m: 'MUSICAS' };
-    const col = PREFIXOS[mCod[1]];
-    if (col) { colEstrita = col; numEstrito = parseInt(mCod[2]); }
-  }
-
-  return Object.entries(TOPICOS).filter(([nome, id]) => {
-    const nNorm = norm(nome);
-    if (colEstrita && numEstrito !== null) {
-      return nNorm.includes(norm(colEstrita)) && extrairNum(nome) === numEstrito;
     }
-    if (colEstrita) return nNorm.includes(norm(colEstrita));
-    return nNorm.includes(norm(termo)) || extrairNum(nome) === extrairNum(termo);
-  }).sort(([a], [b]) => {
-    const numA = extrairNum(a);
-    const numB = extrairNum(b);
-    if (numA !== numB) return numA - numB;
-    return a.localeCompare(b, 'pt-BR', { numeric: true });
-  });
-}
 
-function executarBusca() {
-  haptic();
-  const termo = document.getElementById('search').value.trim();
-  if (!termo) {
-    resetarParaColecoes();
-    return;
-  }
-  const resultados = buscarVolumes(termo);
-  renderizarResultados(resultados, `Resultados para "${termo}"`);
-}
+    // --- BUSCA EXATA E INTELIGENTE ---
+    function buscarVolumes(termo) {
+      const t = norm(termo).replace(/\s/g, '');
+      const mCod = t.match(/^([a-z]+)(\d+)$/);
+      let colEstrita = null, numEstrito = null;
 
-function focarBusca() {
-  haptic();
-  const input = document.getElementById('search');
-  input.focus();
-  input.scrollIntoView({ behavior: 'smooth' });
-}
+      if (mCod) {
+        const PREFIXOS = { a: 'AMARELÕES', o: 'OBRA', r: 'RÉPLICA', t: 'TRÉPLICA', h: 'HISTÓRICO', m: 'MUSICAS' };
+        const col = PREFIXOS[mCod[1]];
+        if (col) { colEstrita = col; numEstrito = parseInt(mCod[2]); }
+      }
 
-// --- EXIBIÇÃO DE RESULTADOS & PAGINAÇÃO EM LOTES ---
-function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
-  window.currentLista = lista;
-  window.currentTitulo = titulo;
-  window.currentPagina = pagina;
+      return Object.entries(TOPICOS).filter(([nome, id]) => {
+        const nNorm = norm(nome);
+        if (colEstrita && numEstrito !== null) {
+          return nNorm.includes(norm(colEstrita)) && extrairNum(nome) === numEstrito;
+        }
+        if (colEstrita) return nNorm.includes(norm(colEstrita));
+        return nNorm.includes(norm(termo)) || extrairNum(nome) === extrairNum(termo);
+      }).sort(([a], [b]) => {
+        const numA = extrairNum(a);
+        const numB = extrairNum(b);
+        if (numA !== numB) return numA - numB;
+        return a.localeCompare(b, 'pt-BR', { numeric: true });
+      });
+    }
 
-  const container = document.getElementById('content-container');
-  if (!lista.length) {
-    container.innerHTML = `
+    function executarBusca() {
+      haptic();
+      const termo = document.getElementById('search').value.trim();
+      if (!termo) {
+        resetarParaColecoes();
+        return;
+      }
+      const resultados = buscarVolumes(termo);
+      renderizarResultados(resultados, `Resultados para "${termo}"`);
+    }
+
+    function focarBusca() {
+      haptic();
+      const input = document.getElementById('search');
+      input.focus();
+      input.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- EXIBIÇÃO DE RESULTADOS & PAGINAÇÃO EM LOTES ---
+    function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
+      window.currentLista = lista;
+      window.currentTitulo = titulo;
+      window.currentPagina = pagina;
+
+      const container = document.getElementById('content-container');
+      if (!lista.length) {
+        container.innerHTML = `
       <div class="empty">
         ❌ Nenhum volume encontrado para a busca.<br><br>
         Tente digitar: <b>A01</b>, <b>O15</b>, <b>H050</b> ou um número como <b>15</b>.
@@ -6643,37 +6783,37 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
         <button class="voltar-btn" onclick="resetarParaColecoes()">← Ver Coleções</button>
       </div>
     `;
-    return;
-  }
+        return;
+      }
 
-  const dictMarcadores = obterMarcadores();
-  const total = lista.length;
-  const totalPaginas = Math.ceil(total / loteTam);
-  const inicio = (pagina - 1) * loteTam;
-  const fim = Math.min(inicio + loteTam, total);
-  const itensPagina = lista.slice(inicio, fim);
+      const dictMarcadores = obterMarcadores();
+      const total = lista.length;
+      const totalPaginas = Math.ceil(total / loteTam);
+      const inicio = (pagina - 1) * loteTam;
+      const fim = Math.min(inicio + loteTam, total);
+      const itensPagina = lista.slice(inicio, fim);
 
-  let html = `<button class="voltar-btn" onclick="resetarParaColecoes()">← Voltar às Coleções</button>`;
-  html += `<div style="font-size:0.9em; font-weight:bold; margin-bottom:12px; color:var(--text-secondary);">${titulo} (${total} volumes):</div>`;
+      let html = `<button class="voltar-btn" onclick="resetarParaColecoes()">← Voltar às Coleções</button>`;
+      html += `<div style="font-size:0.9em; font-weight:bold; margin-bottom:12px; color:var(--text-secondary);">${titulo} (${total} volumes):</div>`;
 
-  itensPagina.forEach(([nome, id]) => {
-    const linkAudio1 = obterLinkFaixa(nome, 1);
-    const mSalvo = dictMarcadores[nome];
-    const isSingle = isSingleTopicCollection(nome);
-    const cleanId = norm(nome).replace(/[^a-z0-9]/g, '');
-    const faixaSalvaNum = mSalvo ? parseInt(mSalvo.faixa) : 1;
+      itensPagina.forEach(([nome, id]) => {
+        const linkAudio1 = obterLinkFaixa(nome, 1);
+        const mSalvo = dictMarcadores[nome];
+        const isSingle = isSingleTopicCollection(nome);
+        const cleanId = norm(nome).replace(/[^a-z0-9]/g, '');
+        const faixaSalvaNum = mSalvo ? parseInt(mSalvo.faixa) : 1;
 
-    html += `
+        html += `
       <div class="vol-item">
         <div class="vol-header">
           <span class="vol-title">📖 ${nome}</span>
         </div>
     `;
 
-    const eNome = esc(nome);
-    if (mSalvo) {
-      const linkPonto = obterLinkFaixa(nome, mSalvo.faixa);
-      html += `
+        const eNome = esc(nome);
+        if (mSalvo) {
+          const linkPonto = obterLinkFaixa(nome, mSalvo.faixa);
+          html += `
         <div class="saved-badge">
           <div>📍 <b>Ponto Salvo:</b> Faixa ${mSalvo.faixa} <small>(${mSalvo.data})</small></div>
           <div class="badge-actions">
@@ -6682,30 +6822,30 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
           </div>
         </div>
       `;
-    }
+        }
 
-    const chipsList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    if (faixaSalvaNum > 10 && !chipsList.includes(faixaSalvaNum)) {
-      chipsList.push(faixaSalvaNum);
-      chipsList.sort((a, b) => a - b);
-    }
+        const chipsList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        if (faixaSalvaNum > 10 && !chipsList.includes(faixaSalvaNum)) {
+          chipsList.push(faixaSalvaNum);
+          chipsList.sort((a, b) => a - b);
+        }
 
-    const listaF = obterListaFaixas(nome);
-    const countF = listaF ? listaF.length : 15;
-    const isExpanded = expandedVolumesSet.has(cleanId);
-    const displayStyle = isExpanded ? 'display:flex;' : 'display:none;';
-    const btnText = isExpanded ? '🎵 Ocultar Lista de Faixas 🔼' : `🎵 Ver Lista de Faixas (${countF} faixas) 🔽`;
+        const listaF = obterListaFaixas(nome);
+        const countF = listaF ? listaF.length : 15;
+        const isExpanded = expandedVolumesSet.has(cleanId);
+        const displayStyle = isExpanded ? 'display:flex;' : 'display:none;';
+        const btnText = isExpanded ? '🎵 Ocultar Lista de Faixas 🔼' : `🎵 Ver Lista de Faixas (${countF} faixas) 🔽`;
 
-    html += `
+        html += `
         <button type="button" class="vol-btn-link" onclick="abrirLinkTelegram('${linkAudio1.url}')">🎧 ABRIR ${nome} NO TELEGRAM</button>
         ${!linkAudio1.exato ? `<div style=\"margin-top:8px; padding:8px 12px; background:rgba(251,191,36,0.15); border:1px solid #fbbf24; border-radius:8px; font-size:0.75em; color:#fbbf24; display:flex; align-items:center; gap:8px;\">⚠️ <b>Offset não detectado</b> — Link abre o tópico. Navegue até a faixa desejada.</div>` : ''}
         
         <div class="faixas-marks">
           <span style="font-size:0.75em; color:var(--text-secondary); width:100%;">Marcar onde parou neste volume:</span>
           ${chipsList.map(f => {
-            const isSelected = mSalvo && parseInt(mSalvo.faixa) === f;
-            return `<button class="mark-chip ${isSelected ? 'active' : ''}" onclick="salvarMarcador('${eNome}', ${f})">📌 Parei F.${f}</button>`;
-          }).join('')}
+          const isSelected = mSalvo && parseInt(mSalvo.faixa) === f;
+          return `<button class="mark-chip ${isSelected ? 'active' : ''}" onclick="salvarMarcador('${eNome}', ${f})">📌 Parei F.${f}</button>`;
+        }).join('')}
         </div>
 
         <div class="stepper-box">
@@ -6723,13 +6863,13 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
         <!-- Lista Expansível de Faixas de Áudio com nomes reais -->
         <div id="tracks-list-${cleanId}" class="tracks-list-container" style="${displayStyle}">
           ${(listaF || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).map((itemF, idx) => {
-            const f = idx + 1;
-            const tituloF = typeof itemF === 'string' ? itemF : ('Faixa ' + f);
-            const isFTocando = mSalvo && parseInt(mSalvo.faixa) === f && mSalvo.tocando !== false;
-            const isFSelected = mSalvo && parseInt(mSalvo.faixa) === f;
-            const playBtnText = isFTocando ? '🔊 Tocando...' : '▶️ Tocar';
-            const playBtnClass = isFTocando ? 'track-play-btn playing' : 'track-play-btn';
-            return `
+          const f = idx + 1;
+          const tituloF = typeof itemF === 'string' ? itemF : ('Faixa ' + f);
+          const isFTocando = mSalvo && parseInt(mSalvo.faixa) === f && mSalvo.tocando !== false;
+          const isFSelected = mSalvo && parseInt(mSalvo.faixa) === f;
+          const playBtnText = isFTocando ? '🔊 Tocando...' : '▶️ Tocar';
+          const playBtnClass = isFTocando ? 'track-play-btn playing' : 'track-play-btn';
+          return `
               <div class="track-row">
                 <span class="track-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%; font-size:0.82em;" title="${tituloF}">🎵 ${tituloF}</span>
                 <div class="track-btns">
@@ -6738,101 +6878,113 @@ function renderizarResultados(lista, titulo, pagina = 1, loteTam = 50) {
                 </div>
               </div>
             `;
-          }).join('')}
+        }).join('')}
         </div>
       </div>
     `;
-  });
+      });
 
-  if (totalPaginas > 1) {
-    html += `<div class="pagination">`;
-    if (pagina > 1) {
-      html += `<button class="page-btn" onclick="mudarPagina('${titulo}', ${pagina - 1})">◀️ Anterior</button>`;
+      if (totalPaginas > 1) {
+        html += `<div class="pagination">`;
+        if (pagina > 1) {
+          html += `<button class="page-btn" onclick="mudarPagina('${titulo}', ${pagina - 1})">◀️ Anterior</button>`;
+        }
+        html += `<span style="font-size:0.85em; align-self:center; color:var(--text-secondary);">${pagina} / ${totalPaginas}</span>`;
+        if (pagina < totalPaginas) {
+          html += `<button class="page-btn" onclick="mudarPagina('${titulo}', ${pagina + 1})">Próximo ▶️</button>`;
+        }
+        html += `</div>`;
+      }
+
+      container.innerHTML = html;
     }
-    html += `<span style="font-size:0.85em; align-self:center; color:var(--text-secondary);">${pagina} / ${totalPaginas}</span>`;
-    if (pagina < totalPaginas) {
-      html += `<button class="page-btn" onclick="mudarPagina('${titulo}', ${pagina + 1})">Próximo ▶️</button>`;
+
+    function mudarPagina(titulo, novaPagina) {
+      haptic();
+      if (window.currentLista) {
+        renderizarResultados(window.currentLista, titulo, novaPagina);
+      }
     }
-    html += `</div>`;
-  }
 
-  container.innerHTML = html;
-}
-
-function mudarPagina(titulo, novaPagina) {
-  haptic();
-  if (window.currentLista) {
-    renderizarResultados(window.currentLista, titulo, novaPagina);
-  }
-}
-
-function abrirColecao(col) {
-  haptic();
-  const volumes = Object.entries(TOPICOS).filter(([n]) => n.startsWith(col + ' - ') || n === col);
-  // Ordena os volumes numericamente crescente (A1, A2... A10... A100)
-  volumes.sort(([a], [b]) => {
-    const numA = extrairNum(a);
-    const numB = extrairNum(b);
-    if (numA !== numB) return numA - numB;
-    return a.localeCompare(b, 'pt-BR', { numeric: true });
-  });
-  document.getElementById('search').value = col;
-  renderizarResultados(volumes, `Coleção ${col}`);
-}
-
-function resetarParaColecoes() {
-  haptic();
-  document.getElementById('search').value = '';
-  const container = document.getElementById('content-container');
-  container.innerHTML = `<div class="colecoes-grid" id="colecoes-grid"></div>`;
-  montarBotoesColecoes();
-}
-
-function montarBotoesColecoes() {
-  const ordemDesejada = ['AMARELÕES', 'OBRA', 'RÉPLICA', 'TRÉPLICA', 'HISTÓRICO', 'MUSICAS'];
-  const colsExistentes = [...new Set(Object.keys(TOPICOS).map(n => n.includes(' - ') ? n.split(' - ')[0].trim() : n.trim()))];
-  
-  const cols = colsExistentes.sort((a, b) => {
-    const idxA = ordemDesejada.indexOf(a.toUpperCase());
-    const idxB = ordemDesejada.indexOf(b.toUpperCase());
-    const posA = idxA !== -1 ? idxA : 999;
-    const posB = idxB !== -1 ? idxB : 999;
-    return posA - posB;
-  });
-
-  const grid = document.getElementById('colecoes-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-
-  cols.forEach((col, idx) => {
-    const btn = document.createElement('button');
-    btn.className = 'col-card ' + cssClass(col);
-    if (cols.length % 2 !== 0 && idx === cols.length - 1) btn.classList.add('col-span2');
-    
-    const emoji = EMOJIS[col.toUpperCase()] || EMOJI_PADRAO;
-    const volsCol = Object.keys(TOPICOS).filter(k => k.startsWith(col + ' - ') || k === col);
-    const isSingleVol = volsCol.length === 1 && volsCol[0] === col;
-    let subLabel;
-    if (isSingleVol) {
-      // Coleção sem subpastas (ex: MUSICAS): mostra qtd de faixas
-      const faixasCol = (FAIXAS && FAIXAS[col]) ? FAIXAS[col].length : 0;
-      subLabel = faixasCol > 0 ? `${faixasCol} faixas disponíveis` : '1 vol disponível';
-    } else {
-      subLabel = `${volsCol.length} Vols disponíveis`;
+    function abrirColecao(col) {
+      haptic();
+      const volumes = Object.entries(TOPICOS).filter(([n]) => n.startsWith(col + ' - ') || n === col);
+      // Ordena os volumes numericamente crescente (A1, A2... A10... A100)
+      volumes.sort(([a], [b]) => {
+        const numA = extrairNum(a);
+        const numB = extrairNum(b);
+        if (numA !== numB) return numA - numB;
+        return a.localeCompare(b, 'pt-BR', { numeric: true });
+      });
+      document.getElementById('search').value = col;
+      renderizarResultados(volumes, `Coleção ${col}`);
     }
-    btn.innerHTML = `${emoji} ${col}<br><small style="font-weight:normal; opacity:0.85;">${subLabel}</small>`;
-    btn.onclick = () => abrirColecao(col);
-    grid.appendChild(btn);
-  });
-}
 
-document.getElementById('search').addEventListener('keyup', e => {
-  if (e.key === 'Enter') executarBusca();
-});
+    function resetarParaColecoes() {
+      haptic();
+      document.getElementById('search').value = '';
+      const container = document.getElementById('content-container');
+      container.innerHTML = `<div class="colecoes-grid" id="colecoes-grid"></div>`;
+      montarBotoesColecoes();
+    }
 
-// Inicialização
-carregarCloudStorage();
-montarBotoesColecoes();
-</script>
+    function montarBotoesColecoes() {
+      const ordemDesejada = ['AMARELÕES', 'OBRA', 'RÉPLICA', 'TRÉPLICA', 'HISTÓRICO', 'MUSICAS'];
+      const colsExistentes = [...new Set(Object.keys(TOPICOS).map(n => n.includes(' - ') ? n.split(' - ')[0].trim() : n.trim()))];
+
+      const cols = colsExistentes.sort((a, b) => {
+        const idxA = ordemDesejada.indexOf(a.toUpperCase());
+        const idxB = ordemDesejada.indexOf(b.toUpperCase());
+        const posA = idxA !== -1 ? idxA : 999;
+        const posB = idxB !== -1 ? idxB : 999;
+        return posA - posB;
+      });
+
+      const grid = document.getElementById('colecoes-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      cols.forEach((col, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'col-card ' + cssClass(col);
+        if (cols.length % 2 !== 0 && idx === cols.length - 1) btn.classList.add('col-span2');
+
+        const emoji = EMOJIS[col.toUpperCase()] || EMOJI_PADRAO;
+        const volsCol = Object.keys(TOPICOS).filter(k => k.startsWith(col + ' - ') || k === col);
+        const isSingleVol = volsCol.length === 1 && volsCol[0] === col;
+        let subLabel;
+        if (isSingleVol) {
+          // Coleção sem subpastas (ex: MUSICAS): mostra qtd de faixas
+          const faixasCol = (FAIXAS && FAIXAS[col]) ? FAIXAS[col].length : 0;
+          subLabel = faixasCol > 0 ? `${faixasCol} faixas disponíveis` : '1 vol disponível';
+        } else {
+          subLabel = `${volsCol.length} Vols disponíveis`;
+        }
+        btn.innerHTML = `${emoji} ${col}<br><small style="font-weight:normal; opacity:0.85;">${subLabel}</small>`;
+        btn.onclick = () => abrirColecao(col);
+        grid.appendChild(btn);
+      });
+    }
+
+    document.getElementById('search').addEventListener('keyup', e => {
+      if (e.key === 'Enter') executarBusca();
+    });
+
+    // Inicialização
+    carregarCloudStorage();
+    montarBotoesColecoes();
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Intercepta e redireciona cliques em links do Telegram diretamente para o App Desktop
+      document.addEventListener("click", function (e) {
+        const anchor = e.target.closest('a[href*="t.me/c/"]');
+        if (anchor) {
+          anchor.href = anchor.href.replace(/https:\/\/t\.me\/c\/(\d+)\/(\d+)/, 'tg://privatepost?channel=$1&post=$2');
+        }
+      });
+    });
+  </script>
 </body>
+
 </html>
