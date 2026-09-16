@@ -6271,43 +6271,165 @@
   "OBRA - O15": {
     "first_msg_id": 36915,
     "faixas": {
-      "15": 36934
+      "01": 36915,
+      "02": 36916,
+      "03": 36917,
+      "04": 36918,
+      "05": 36919,
+      "06": 36920,
+      "07": 36921,
+      "08": 36922,
+      "09": 36923,
+      "10": 36924,
+      "11": 36925,
+      "12": 36926,
+      "13": 36927,
+      "14": 36928,
+      "15": 36929,
+      "16": 36930,
+      "17": 36931,
+      "18": 36932,
+      "19": 36933,
+      "20": 36934
     }
   },
   "OBRA - O16": {
     "first_msg_id": 36935,
     "faixas": {
-      "16": 36953
+      "01": 36935,
+      "02": 36936,
+      "03": 36937,
+      "04": 36938,
+      "05": 36939,
+      "06": 36940,
+      "07": 36941,
+      "08": 36942,
+      "09": 36943,
+      "10": 36944,
+      "11": 36945,
+      "12": 36946,
+      "13": 36947,
+      "14": 36948,
+      "15": 36949,
+      "16": 36950,
+      "17": 36951,
+      "18": 36952,
+      "19": 36953
     }
   },
   "OBRA - O17": {
     "first_msg_id": 36954,
     "faixas": {
+      "01": 36954,
+      "02": 36955,
+      "03": 36956,
+      "04": 36957,
+      "05": 36958,
+      "06": 36959,
+      "07": 36960,
+      "08": 36961,
+      "09": 36962,
+      "10": 36963,
+      "11": 36964,
+      "12": 36965,
+      "13": 36966,
+      "14": 36967,
+      "15": 36968,
+      "16": 36969,
       "17": 36970
     }
   },
   "OBRA - O18": {
     "first_msg_id": 36971,
     "faixas": {
-      "18": 36986
+      "01": 36971,
+      "02": 36972,
+      "03": 36973,
+      "04": 36974,
+      "05": 36975,
+      "06": 36976,
+      "07": 36977,
+      "08": 36978,
+      "09": 36979,
+      "10": 36980,
+      "11": 36981,
+      "12": 36982,
+      "13": 36983,
+      "14": 36984,
+      "15": 36985,
+      "16": 36986
     }
   },
   "OBRA - O19": {
     "first_msg_id": 36987,
     "faixas": {
-      "19": 37006
+      "01": 36987,
+      "02": 36988,
+      "03": 36989,
+      "04": 36990,
+      "05": 36991,
+      "06": 36992,
+      "07": 36993,
+      "08": 36994,
+      "09": 36995,
+      "10": 36996,
+      "11": 36997,
+      "12": 36998,
+      "13": 36999,
+      "14": 37000,
+      "15": 37001,
+      "16": 37002,
+      "17": 37003,
+      "18": 37004,
+      "19": 37005,
+      "20": 37006
     }
   },
   "OBRA - O20": {
     "first_msg_id": 37007,
     "faixas": {
-      "20": 37023
+      "01": 37007,
+      "02": 37008,
+      "03": 37009,
+      "04": 37010,
+      "05": 37011,
+      "06": 37012,
+      "07": 37013,
+      "08": 37014,
+      "09": 37015,
+      "10": 37016,
+      "11": 37017,
+      "12": 37018,
+      "13": 37019,
+      "14": 37020,
+      "15": 37021,
+      "16": 37022,
+      "17": 37023
     }
   },
   "OBRA - O21": {
     "first_msg_id": 37024,
     "faixas": {
-      "21": 37043
+      "01": 37024,
+      "02": 37025,
+      "03": 37026,
+      "04": 37027,
+      "05": 37028,
+      "06": 37029,
+      "07": 37030,
+      "08": 37031,
+      "09": 37032,
+      "10": 37033,
+      "11": 37034,
+      "12": 37035,
+      "13": 37036,
+      "14": 37037,
+      "15": 37038,
+      "16": 37039,
+      "17": 37040,
+      "18": 37041,
+      "19": 37042,
+      "20": 37043
     }
   }
 };
@@ -6421,7 +6543,7 @@
     // Retorna objeto: { url, exato: boolean, threadId, msgId }
     function obterLinkFaixa(volNome, faixaNum = 1) {
       const threadId = obterThreadId(volNome);
-      if (!threadId) return { url: 'https://t.me/c/4415417039', exato: false, threadId: null, msgId: null };
+      if (!threadId) return { url: GROUP_LINK, exato: false, threadId: null, msgId: null };
 
       const f = Math.max(1, parseInt(faixaNum) || 1);
       const fStr = String(f).padStart(2, '0');
@@ -6429,11 +6551,12 @@
       // FORMATO NOVO: mapeamento direto via FAIXAS_MSGS
       if (FAIXAS_MSGS && FAIXAS_MSGS[volNome] && FAIXAS_MSGS[volNome].faixas && FAIXAS_MSGS[volNome].faixas[fStr]) {
         const msgId = FAIXAS_MSGS[volNome].faixas[fStr];
-        return { url: `https://t.me/c/4415417039/${msgId}`, exato: true, threadId, msgId };
+        // Usa GROUP_LINK dinâmico (gerado em gerar_webapp.py) em vez de ID hardcoded
+        return { url: `${GROUP_LINK}${msgId}`, exato: true, threadId, msgId };
       }
 
       // Fallback: usar threadId (link genérico do tópico)
-      return { url: `https://t.me/c/4415417039/${threadId}`, exato: false, threadId, msgId: null };
+      return { url: `${GROUP_LINK}${threadId}`, exato: false, threadId, msgId: null };
     }
 
     // Verifica se o volume tem mapeamento de faixas detectado
