@@ -12462,16 +12462,10 @@
         const GROUP_CLEAN_ID = match[1];
         const msgId = match[2];
 
-        // MINI APP (web_app): usa openTelegramLink do Telegram WebApp API
-        if (tg && typeof tg.openTelegramLink === 'function') {
-          const tmeUrl = `https://t.me/c/${GROUP_CLEAN_ID}/${msgId}`;
-          console.log('[WebApp] openTelegramLink:', tmeUrl);
-          tg.openTelegramLink(tmeUrl);
-          return false;
-        }
-
-        // NAVEGADOR (url): usa protocolo tg:// direto
+        // FORMATO NOVO (Abre direto no Telegram Desktop):
         const url = `tg://privatepost?channel=${GROUP_CLEAN_ID}&post=${msgId}`;
+
+        // Redireciona via protocolo nativo do sistema/desktop
         window.location.href = url;
         return false;
       }
@@ -13155,16 +13149,8 @@
             const channelId = match[1];
             const postId = match[2];
 
-            // MINI APP: usa openTelegramLink do Telegram WebApp API
-            const tgApp = window.Telegram && window.Telegram.WebApp;
-            if (tgApp && typeof tgApp.openTelegramLink === 'function') {
-              const tmeUrl = `https://t.me/c/${channelId}/${postId}`;
-              console.log('[WebApp] openTelegramLink (click):', tmeUrl);
-              tgApp.openTelegramLink(tmeUrl);
-            } else {
-              // NAVEGADOR: usa protocolo tg:// direto
-              window.location.href = `tg://privatepost?channel=${channelId}&post=${postId}`;
-            }
+            // 3. Redireciona EXCLUSIVAMENTE para o Telegram Desktop
+            window.location.href = `tg://privatepost?channel=${channelId}&post=${postId}`;
           }
         }
       }, true); // O argumento 'true' ativa o modo de CAPTURA PRIORITÁRIA
